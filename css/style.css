@@ -99,6 +99,7 @@ a:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid var
 .bar{position:fixed;inset:0 0 auto 0;z-index:20;height:var(--bar-height);padding:0 var(--gutter);padding-top:env(safe-area-inset-top);
   display:flex;align-items:center;justify-content:space-between;background:var(--bar-bg);color:#fff;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
 .bar-logo{font-weight:700;font-size:18px;letter-spacing:.2em;text-decoration:none;min-height:44px;display:flex;align-items:center}
+.bar-back{letter-spacing:0;margin-right:.3em}
 .bar-link{font-size:14px;font-weight:700;text-decoration:none;min-height:44px;display:flex;align-items:center}
 
 /* ===== 夜の紺の面（portal のヒーローと同じ方眼と光） ===== */
