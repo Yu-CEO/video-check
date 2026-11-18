@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<!--
+  index.html：画面の骨組み（上のバー・画面を描く場所・ファイル選び）と、読み込み先の制限（CSP）だけを書く入口のファイル。
+  画面の中身は js/main.js が描く（はじめ → 処理中 → レポート）。見た目は css/style.css。
+  CSP（Content-Security-Policy＝読み込み先の制限）：読み込みは同じサイトだけ。外へは GoatCounter の計測の画像1つだけ（AC-4）。
+    'wasm-unsafe-eval' は文字起こしの部品（WebAssembly）を動かすために必要。media-src の blob: は選んだ動画を端末の中で開くために必要。
+  Webフォント・画像ファイルは読まない（AC-28）。文字起こしは「話す速さも測る」を押したときだけ読む（AC-27）。
+-->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self'; img-src 'self' https://yuceo.goatcounter.com; media-src 'self' blob:; connect-src 'self'; worker-src 'self'; font-src 'none'; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="縦のショート動画を選ぶだけで、冒頭3秒・話す速さ・無音など6つの項目を、伸びるショート動画の目安と比べる無料ツール。動画は端末の外へ送りません。">
+<meta name="theme-color" content="#0a0e17">
+<title>ショート動画のかんたん診断｜Yu</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="css/style.css">
+<script type="module" src="js/main.js"></script>
+</head>
+<body>
+<nav class="bar" aria-label="サイトのメニュー">
+  <a class="bar-logo" href="https://yu-ceo.github.io/">Yu</a>
+  <a class="bar-link" href="https://www.tiktok.com/@yu_from_l2w" target="_blank" rel="noopener noreferrer">TikTokを見る</a>
+</nav>
+
+<div id="app">
+  <!-- JavaScript が動かないときだけ見える案内（ふだんは main.js がすぐ書き換える） -->
+  <header class="night top"><div class="wrap">
+    <p class="eyebrow">VIDEO CHECK</p>
+    <h1 class="title"><span><b>ショート動画の</b></span><span>かんたん診断</span></h1>
+    <noscript><p class="lead">このツールは JavaScript を使います。ブラウザの設定で JavaScript をオンにしてから開き直してください。</p></noscript>
+  </div></header>
+</div>
+<input type="file" id="file" accept="video/*" class="sr" tabindex="-1" aria-hidden="true">
+</body>
+</html>

@@ -1,0 +1,78 @@
+# CI/CD（自動チェックと自動公開）の設定：ブラウザで動くソフト（HTML/JS）用
+# GitHubにコードを上げるたびに、次を自動で実行する。
+#   1. テスト（tests/ フォルダ。node --test）
+#   2. 機密チェック（ci/confidential_check.py）
+#   3. 1と2が合格し、Web公開がオンのときだけ、GitHub Pages に公開する
+# Web公開をオンにする方法：リポジトリの Settings → Secrets and variables → Actions → Variables に
+#   DEPLOY_PAGES = true を登録する（CEOが公開を決めたソフトだけ）
+# 機密の言葉：Settings → Secrets and variables → Actions → Secrets に CONFIDENTIAL_WORDS（1行に1語）を登録する。
+#   登録していないと、機密チェックは --require-words により「NG」で止まる（登録忘れのまま合格にしないため）
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# 全体の権限は「何もなし」にしておき、ジョブごとに必要な分だけ渡す
+permissions: {}
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read      # コードを読むだけ
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "20"
+
+      # tests/ にテストがあるときだけ実行する
+      - name: テスト
+        run: |
+          if [ -d tests ]; then node --test tests/; else echo "テストなし"; fi
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: 機密チェック
+        env:
+          CONFIDENTIAL_WORDS: ${{ secrets.CONFIDENTIAL_WORDS }}
+        # --require-words：言葉のリストが空なら失敗にする
+        run: python ci/confidential_check.py --require-words
+
+  # ここから下が CD（自動公開）。チェックが合格したときだけ動く
+  deploy:
+    needs: check
+    if: github.ref == 'refs/heads/main' && vars.DEPLOY_PAGES == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read      # コードを読む
+      pages: write        # GitHub Pages に公開する
+      id-token: write     # 公開のときの本人確認に使う
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v5
+
+      # 公開するファイルだけをまとめる（テスト・docs・CIの設定は公開しない）
+      - name: 公開するファイルをまとめる
+        run: |
+          mkdir _site
+          cp index.html favicon.svg _site/
+          for dir in css js data vendor; do
+            cp -r "$dir" _site/
+          done
+
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+
+      - id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,319 @@
+/*
+ * style.css：video-check の見た目（スマホ優先。360px でも横にはみ出さない）
+ * もとにしたもの：試作画面と同じ見た目と、portal の変数（夜の紺・白とグレーの面）。
+ * 文字は端末の文字だけ（Webフォントなし＝AC-28）。絵は SVG をその場で描く（画像ファイル0枚）。
+ * 文字の太さは 400（ふつう）と 700（太字）の2つだけにする。端末の日本語の文字は太さごとに別のファイルを読むので、
+ * 太さの種類が多いと最初の表示（Lighthouse の Style & Layout）が重くなるため（AC-29）。
+ * 色・大きさの値は先頭の :root にまとめる。レーダーチャートの色は下の「レーダーチャート（SVG）」の .r-* で付ける。
+ */
+:root{
+  /* ===== portal と同じ値（products/portal/css/variables.css。変えない） ===== */
+  --color-white:#ffffff;          /* 白い面 */
+  --color-gray:#f2f3f5;           /* 薄いグレーの面（項目カードの下地） */
+  --color-text:#16171a;           /* 明るい面の文字 */
+  --color-text-sub:#5b5f66;       /* 説明・注意書き（白の上で4.5:1以上） */
+  --color-line:#d9dbe0;           /* 枠線 */
+  --bar-bg:rgba(10,11,14,.62);    /* 上の固定バー */
+  --hero-bg-dark:#0a0e17;         /* 夜の紺（はじめ・処理中・結果の上部） */
+  --hero-text:#ffffff;
+  --hero-text-sub:#c3c8d2;        /* 紺の上の説明文 */
+  --hero-accent:#7cc4ff;          /* 紺の上の差し色 */
+  --hero-grid:rgba(150,185,255,.08);
+  --hero-glow:rgba(124,196,255,.20);
+  --hero-glow-2:rgba(150,130,255,.14);
+  --hero-btn-main:#ffffff;        /* 紺の上の主ボタン（白） */
+  --hero-btn-main-text:#16171a;
+  --hero-btn-sub-border:rgba(255,255,255,.7);
+  --color-btn-main:#16171a;       /* 白の上の主ボタン（黒） */
+  --color-btn-main-text:#ffffff;
+  --color-focus:#3b82f6;
+  --accent:#2563a8;               /* 明るい面の差し色（日記と同じ） */
+  --card-border:#e3e5e9;
+  --card-shadow:0 2px 10px rgba(16,18,24,.06);
+  --glass:rgba(255,255,255,.06);  /* 紺の上のすりガラスの箱 */
+  --glass-border:rgba(124,196,255,.30);
+
+  /* ===== 文字（端末の文字だけ。Webフォントは読まない＝AC-28） ===== */
+  --fs-eyebrow:12px;                        /* 英字の小見出し */
+  --fs-title:clamp(26px, 7.2vw, 44px);      /* ページの見出し */
+  --fs-lead:clamp(15px, 4.1vw, 17px);       /* 見出しの下の説明 */
+  --fs-body:clamp(15px, 4.1vw, 17px);       /* 本文 */
+  --fs-card-title:clamp(16px, 4.5vw, 18px); /* 項目カードの見出し */
+  --fs-value:clamp(22px, 6.2vw, 28px);      /* 自分の測った値（いちばん大きい数字） */
+  --fs-small:13px;                          /* 補足・基準の範囲 */
+  --fs-note:12px;                           /* 注意書き・ライセンス */
+  --fs-button:16px;
+  --fs-badge:12px;                          /* 「基準の中央の範囲」などの札 */
+
+  /* ===== 余白・形 ===== */
+  --bar-height:52px;
+  --gutter:20px;                  /* 左右の余白（360pxで本文幅320px） */
+  --content-max:680px;            /* PCでの本文の最大幅 */
+  --section-gap:36px;             /* 区画どうし */
+  --card-pad:18px;                /* カードの内側 */
+  --card-radius:16px;
+  --btn-height:52px;              /* 主ボタン（44px以上） */
+  --btn-height-sub:44px;          /* 小さいボタン・リンク（44px以上） */
+  --btn-radius:12px;
+  --btn-max:340px;
+  --radar-max:400px;              /* レーダーチャートの最大幅（スマホは本文幅いっぱい） */
+
+  /* ===== 結果の札の色（赤は使わない＝責めない。白地で4.5:1以上） ===== */
+  --vc-ok:#127a3e;     --vc-ok-bg:#e8f5ee;    /* 基準の中央の範囲 */
+  --vc-near:#2563a8;   --vc-near-bg:#eaf1fa;  /* 少し外れています */
+  --vc-far:#a14a00;    --vc-far-bg:#fbf0e6;   /* 伸びしろあり（オレンジ） */
+  --vc-none:#5b5f66;   --vc-none-bg:#f2f3f5;  /* 未測定 */
+
+  /* ===== レーダーチャート（紺の上） ===== */
+  --radar-grid:rgba(195,200,210,.26);       /* 目盛りの線 */
+  --radar-band:rgba(124,196,255,.13);       /* 基準の中央の範囲（点数80〜100の帯） */
+  --radar-band-line:rgba(124,196,255,.55);
+  --radar-none:#8a8f98;                     /* 未測定の軸・点線（灰色） */
+  --radar-me:#7cc4ff;                       /* 自分の線 */
+  --radar-me-fill:rgba(124,196,255,.24);
+
+  /* ===== 範囲のものさし（各項目） ===== */
+  --scale-track:#e3e5e9;          /* 全体 */
+  --scale-band:#bfe3cc;           /* 基準の中央の範囲（25〜75%） */
+  --scale-height:10px;
+  --dot-size:16px;
+
+  /* ===== 進み具合のバー ===== */
+  --progress-track:rgba(255,255,255,.16);
+  --progress-bar:#7cc4ff;
+  --progress-track-light:#e3e5e9;
+  --progress-bar-light:#2563a8;
+  --progress-height:8px;
+}
+
+/* ===== 基本 ===== */
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--color-gray);color:var(--color-text);
+  font-family:system-ui,-apple-system,"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Meiryo",sans-serif;
+  line-height:1.7;overflow-x:hidden}
+a{color:inherit}
+[hidden]{display:none !important}
+a:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid var(--color-focus);outline-offset:3px}
+.sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.bar{position:fixed;inset:0 0 auto 0;z-index:20;height:var(--bar-height);padding:0 var(--gutter);padding-top:env(safe-area-inset-top);
+  display:flex;align-items:center;justify-content:space-between;background:var(--bar-bg);color:#fff;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.bar-logo{font-weight:700;font-size:18px;letter-spacing:.2em;text-decoration:none;min-height:44px;display:flex;align-items:center}
+.bar-link{font-size:14px;font-weight:700;text-decoration:none;min-height:44px;display:flex;align-items:center}
+
+/* ===== 夜の紺の面（portal のヒーローと同じ方眼と光） ===== */
+.night{position:relative;color:var(--hero-text);background:var(--hero-bg-dark);overflow:hidden;isolation:isolate}
+.night::before{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:linear-gradient(var(--hero-grid) 1px, transparent 1px) 0 0/32px 32px,linear-gradient(90deg, var(--hero-grid) 1px, transparent 1px) 0 0/32px 32px;
+  -webkit-mask-image:radial-gradient(ellipse 85% 60% at 50% 40%, #000 20%, transparent 78%);mask-image:radial-gradient(ellipse 85% 60% at 50% 40%, #000 20%, transparent 78%)}
+.night::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:radial-gradient(circle at 50% 30%, var(--hero-glow), transparent 42%),radial-gradient(circle at 85% 92%, var(--hero-glow-2), transparent 40%)}
+.night > *{position:relative;z-index:2}
+.wrap{max-width:var(--content-max);margin:0 auto;padding:0 var(--gutter)}
+.top{padding:calc(var(--bar-height) + 28px) 0 36px}
+.eyebrow{margin:0 0 10px;font-size:var(--fs-eyebrow);font-weight:700;letter-spacing:.22em;color:var(--hero-accent)}
+.title{margin:0;font-size:var(--fs-title);line-height:1.35;font-weight:400;letter-spacing:.06em}
+.title b{font-weight:700}
+.title span{display:inline-block}
+.lead{margin:12px 0 0;font-size:var(--fs-lead);line-height:1.8;color:var(--hero-text-sub)}
+
+/* ===== 「送らない・保存しない」の箱（選ぶボタンのすぐ上。常に出す＝AC-2） ===== */
+.safe{display:grid;grid-template-columns:36px minmax(0,1fr);gap:12px;align-items:start;margin:20px 0 0;padding:14px 16px;
+  background:var(--glass);border:1px solid var(--glass-border);border-radius:var(--card-radius)}
+.safe svg{display:block;width:36px;height:36px}
+.safe h2{margin:0;font-size:15px;font-weight:700;letter-spacing:.04em}
+.safe .safe-face{margin:4px 0 0;font-size:14px;font-weight:700;color:#fff}
+.safe p{margin:4px 0 0;font-size:var(--fs-small);line-height:1.75;color:var(--hero-text-sub);overflow-wrap:anywhere}
+/* 処理中・結果の画面で出す短い版（1行） */
+.safe-mini{display:flex;align-items:center;gap:8px;margin:14px 0 0;font-size:var(--fs-small);color:var(--hero-text-sub)}
+.safe-mini svg{flex:none;width:18px;height:18px}
+
+/* ===== ボタン ===== */
+.btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;max-width:var(--btn-max);min-height:var(--btn-height);padding:0 22px;
+  border-radius:var(--btn-radius);font:inherit;font-size:var(--fs-button);font-weight:700;letter-spacing:.03em;text-decoration:none;border:1.5px solid transparent;cursor:pointer}
+.btn:disabled{cursor:default;opacity:.55}
+.btn-hero{background:var(--hero-btn-main);color:var(--hero-btn-main-text)}
+.btn-hero-sub{background:transparent;color:#fff;border-color:var(--hero-btn-sub-border);min-height:var(--btn-height-sub)}
+.btn-main{background:var(--color-btn-main);color:var(--color-btn-main-text)}
+.btn-sub{background:var(--color-white);color:var(--color-text);border-color:var(--color-line);min-height:var(--btn-height-sub)}
+.btn svg{width:20px;height:20px;flex:none}
+.pick{margin-top:18px}
+.pick-note{margin:10px 0 0;font-size:var(--fs-small);color:var(--hero-text-sub)}
+.actions{display:flex;flex-direction:column;gap:10px;margin-top:18px}
+@media (min-width:640px){ .actions.row{flex-direction:row} }
+
+/* ===== はじめの画面：選べなかったとき（紺の上の白いカード。オレンジの印・赤は使わない） ===== */
+.msg{margin:16px 0 0;padding:14px 16px;border-radius:var(--card-radius);background:var(--color-white);color:var(--color-text);
+  border-left:4px solid var(--vc-far)}
+.msg h2{display:flex;align-items:center;gap:8px;margin:0;font-size:15px;font-weight:700}
+.msg h2::before{content:"!";flex:none;display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;
+  background:var(--vc-far-bg);color:var(--vc-far);font-size:13px;font-weight:700}
+.msg p{margin:6px 0 0;font-size:var(--fs-small);line-height:1.75;color:var(--color-text-sub);overflow-wrap:anywhere}
+.msg .file{color:var(--color-text);font-weight:700}
+
+/* ===== 明るい面の区画 ===== */
+.sec{padding:var(--section-gap) 0 0}
+.sec:last-of-type{padding-bottom:var(--section-gap)}
+.sec-title{display:flex;align-items:center;gap:10px;margin:0 0 14px;font-size:var(--fs-card-title);font-weight:700;letter-spacing:.04em}
+.sec-title .num{font-size:12px;font-weight:700;letter-spacing:.18em;color:var(--accent)}
+.sec-title .num::after{content:"";display:inline-block;width:18px;height:1px;margin-left:10px;vertical-align:middle;background:currentColor}
+.sec-lead{margin:-6px 0 14px;font-size:var(--fs-small);color:var(--color-text-sub)}
+.card{background:var(--color-white);border:1px solid var(--card-border);border-radius:var(--card-radius);box-shadow:var(--card-shadow);padding:var(--card-pad)}
+.card + .card{margin-top:12px}
+
+/* はじめ：わかること（6項目） */
+.axes6{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr;gap:8px}
+@media (min-width:560px){ .axes6{grid-template-columns:1fr 1fr} }
+.axes6 li{display:grid;grid-template-columns:28px minmax(0,1fr);gap:10px;align-items:start;padding:12px 14px;background:var(--color-white);
+  border:1px solid var(--card-border);border-radius:12px}
+.axes6 .n{display:flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;border:1px solid var(--accent);color:var(--accent);font-size:13px;font-weight:700}
+.axes6 b{display:block;font-size:15px;line-height:1.5}
+.axes6 span{display:block;font-size:var(--fs-small);line-height:1.6;color:var(--color-text-sub)}
+.steps{list-style:none;margin:0;padding:0;counter-reset:s}
+.steps.card{padding:var(--card-pad)}
+.steps li{position:relative;padding:0 0 0 34px;font-size:var(--fs-body);line-height:1.7}
+.steps li + li{margin-top:10px}
+.steps li::before{counter-increment:s;content:counter(s);position:absolute;left:0;top:2px;width:24px;height:24px;border-radius:50%;
+  background:var(--hero-bg-dark);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.steps small{display:block;font-size:var(--fs-small);color:var(--color-text-sub)}
+
+/* ===== 処理中 ===== */
+.proc{min-height:100vh;min-height:100svh}
+.fileinfo{display:grid;grid-template-columns:44px minmax(0,1fr);gap:12px;align-items:center;margin:18px 0 0;padding:12px 14px;border-radius:14px;background:var(--glass);border:1px solid var(--glass-border)}
+.fileinfo .ic{width:44px;height:56px;border-radius:8px;background:linear-gradient(160deg,#1a2234,#0d1220);border:1px solid var(--glass-border);display:flex;align-items:center;justify-content:center}
+.fileinfo .ic::before{content:"";border-style:solid;border-width:7px 0 7px 11px;border-color:transparent transparent transparent var(--hero-accent)}
+.fileinfo b{display:block;font-size:15px;line-height:1.5;overflow-wrap:anywhere}
+.fileinfo span{display:block;font-size:var(--fs-small);color:var(--hero-text-sub)}
+.progress{margin:26px 0 0}
+.progress-label{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin:0 0 8px;font-size:var(--fs-body);font-weight:700}
+.progress-label .pct{font-size:var(--fs-value);font-weight:400;letter-spacing:.04em;font-variant-numeric:tabular-nums}
+.bar-track{height:var(--progress-height);border-radius:999px;background:var(--progress-track);overflow:hidden}
+.bar-fill{height:100%;border-radius:999px;background:var(--progress-bar);transition:width .3s}
+.light .bar-track{background:var(--progress-track-light)}
+.light .bar-fill{background:var(--progress-bar-light)}
+.stepper{list-style:none;margin:20px 0 0;padding:0}
+.stepper li{display:flex;align-items:center;gap:10px;min-height:36px;font-size:15px;color:var(--hero-text-sub)}
+.stepper li::before{content:"";flex:none;width:18px;height:18px;border-radius:50%;border:1.5px solid rgba(195,200,210,.5)}
+.stepper li.done{color:#fff}
+.stepper li.done::before{border-color:var(--hero-accent);background:var(--hero-accent);
+  box-shadow:inset 0 0 0 4px var(--hero-bg-dark)}
+.stepper li.now{color:#fff;font-weight:700}
+.stepper li.now::before{border-color:var(--hero-accent);border-right-color:transparent;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){ .stepper li.now::before,.spin{animation:none !important} .bar-fill{transition:none} }
+.proc-note{margin:22px 0 0;font-size:var(--fs-small);line-height:1.8;color:var(--hero-text-sub)}
+
+/* ===== レポート：上部（紺）＝レーダーチャート ===== */
+.back{display:inline-flex;align-items:center;gap:8px;min-height:var(--btn-height-sub);font-size:14px;font-weight:700;text-decoration:none;color:var(--hero-text-sub);
+  background:none;border:0;padding:0;font-family:inherit;cursor:pointer}
+.back::before{content:"";width:8px;height:8px;border-left:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(45deg)}
+.report-top{padding:calc(var(--bar-height) + 4px) 0 30px}
+.meta{display:flex;flex-wrap:wrap;gap:4px 14px;margin:10px 0 0;font-size:var(--fs-small);color:var(--hero-text-sub)}
+.meta b{color:#fff;font-weight:700;overflow-wrap:anywhere}
+.radar-box{margin:18px auto 0;max-width:var(--radar-max)}
+.radar{display:block;width:100%;height:auto;aspect-ratio:320/300}   /* 高さを先に取る＝表示のずれを防ぐ（Lighthouse） */
+.legend{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 18px;margin:6px 0 0;padding:0;list-style:none;font-size:var(--fs-small);color:var(--hero-text-sub)}
+.legend li{display:flex;align-items:center;gap:8px}
+.legend i{display:inline-block;width:18px;height:12px;border-radius:3px}
+.legend .me{background:var(--radar-me-fill);border:2px solid var(--radar-me)}
+.legend .band{background:var(--radar-band);border:1px dashed var(--radar-band-line)}
+.summary{margin:18px 0 0;padding:14px 16px;border-radius:var(--card-radius);background:var(--glass);border:1px solid var(--glass-border)}
+.summary p{margin:0;font-size:var(--fs-body);line-height:1.75;font-weight:700}
+.summary .sub{margin-top:6px;font-size:var(--fs-small);font-weight:400;color:var(--hero-text-sub)}
+.summary a{display:inline-flex;align-items:center;min-height:44px;margin-top:4px;font-size:15px;font-weight:700;color:var(--hero-accent);text-decoration:none}
+.summary a::after{content:"";width:7px;height:7px;margin-left:8px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg) translateY(-2px)}
+.nobase{margin:18px 0 0}
+
+/* ===== 話す速さのボタン（任意。押すまでモデルを読まない＝AC-13・27） ===== */
+.speech{border-color:var(--accent);border-width:1.5px}
+.speech h3{display:flex;align-items:center;gap:8px;margin:0;font-size:var(--fs-card-title);font-weight:700}
+.speech p{margin:8px 0 0;font-size:var(--fs-small);line-height:1.8;color:var(--color-text-sub)}
+.speech .size{margin-right:6px}
+.speech .size{display:inline-flex;align-items:center;gap:6px;margin-top:10px;padding:4px 10px;border-radius:999px;background:var(--vc-near-bg);color:var(--accent);font-size:var(--fs-small);font-weight:700}
+.speech .btn{margin-top:14px;max-width:none}
+.speech .progress{margin-top:14px}
+.speech .progress-label{font-size:15px}
+.speech .progress-label .pct{font-size:18px;font-weight:700}
+.spin{display:inline-block;width:18px;height:18px;border-radius:50%;border:2px solid currentColor;border-right-color:transparent;animation:spin 1s linear infinite;flex:none}
+.speech.is-done{border-color:var(--card-border);border-width:1px}
+.speech.is-fail{border-color:var(--card-border);border-width:1px;border-left:4px solid var(--vc-far)}
+
+/* ===== 項目カード（値・基準の範囲・ものさし・一言・ヒント） ===== */
+.axis-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 10px}
+.axis-head h3{margin:0;font-size:var(--fs-card-title);font-weight:700;line-height:1.5}
+.badge{display:inline-flex;align-items:center;gap:6px;min-height:26px;padding:0 10px;border-radius:999px;font-size:var(--fs-badge);font-weight:700;letter-spacing:.04em;white-space:nowrap}
+.badge::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.lv-ok .badge{background:var(--vc-ok-bg);color:var(--vc-ok)}
+.lv-near .badge{background:var(--vc-near-bg);color:var(--vc-near)}
+.lv-far .badge{background:var(--vc-far-bg);color:var(--vc-far)}
+.lv-none .badge{background:var(--vc-none-bg);color:var(--vc-none)}
+.axis-what{margin:4px 0 0;font-size:var(--fs-small);color:var(--color-text-sub)}
+.vals{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;margin:14px 0 0}
+.vals div{min-width:0}
+.vals dt{font-size:var(--fs-note);font-weight:700;letter-spacing:.06em;color:var(--color-text-sub)}
+.vals dd{margin:2px 0 0;overflow-wrap:anywhere}
+.vals .me{font-size:var(--fs-value);font-weight:700;line-height:1.25;letter-spacing:.02em;font-variant-numeric:tabular-nums}
+.vals .me small{font-size:13px;font-weight:700;margin-left:3px;color:var(--color-text-sub)}
+.vals .base{font-size:15px;font-weight:700;line-height:1.5}
+.vals .base small{display:block;font-size:var(--fs-note);font-weight:400;color:var(--color-text-sub)}
+/* ものさし：全体の帯の上に「基準の中央の範囲」を緑で、自分を丸で */
+.scale{position:relative;margin:18px 6px 0;height:calc(var(--dot-size) + 24px)}
+.scale .track{position:absolute;left:0;right:0;top:3px;height:var(--scale-height);border-radius:999px;background:var(--scale-track)}
+.scale .band{position:absolute;top:3px;height:var(--scale-height);background:var(--scale-band)}
+.scale .mid{position:absolute;top:0;width:2px;height:16px;margin-left:-1px;background:var(--vc-ok)}
+.scale .dot{position:absolute;top:0;width:var(--dot-size);height:var(--dot-size);margin-left:calc(var(--dot-size) / -2);border-radius:50%;background:var(--color-white);border:4px solid currentColor;box-shadow:0 1px 4px rgba(0,0,0,.2)}
+.lv-ok .scale .dot{color:var(--vc-ok)} .lv-near .scale .dot{color:var(--vc-near)} .lv-far .scale .dot{color:var(--vc-far)}
+.scale .lbl{position:absolute;bottom:0;font-size:11px;color:var(--color-text-sub);white-space:nowrap;transform:translateX(-50%)}
+.scale .lbl.l{transform:none;left:0} .scale .lbl.r{transform:none;right:0}
+.say{margin:14px 0 0;font-size:var(--fs-body);line-height:1.8}
+.hint{margin:12px 0 0;padding:12px 14px;border-radius:12px;background:var(--color-gray);font-size:15px;line-height:1.8}
+.hint.first{margin-top:14px;background:var(--vc-far-bg)}
+.hint.first b{color:var(--vc-far)}
+.hint b{display:block;font-size:var(--fs-note);letter-spacing:.12em;color:var(--accent)}
+.score{margin:10px 0 0;font-size:var(--fs-note);color:var(--color-text-sub)}
+
+/* 基準の出どころ・注意書き */
+.src dl{display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 14px;margin:12px 0 0;font-size:var(--fs-small)}
+.src dt{color:var(--color-text-sub)} .src dd{margin:0;font-weight:700;overflow-wrap:anywhere}
+.src p{margin:0;font-size:var(--fs-body);line-height:1.8}
+.src details{margin-top:10px}
+.src summary{display:flex;align-items:center;min-height:44px;font-size:15px;font-weight:700;color:var(--accent);cursor:pointer}
+.src details p{font-size:var(--fs-small);color:var(--color-text-sub)}
+.cautions{list-style:none;margin:0;padding:0}
+.cautions li{position:relative;padding-left:20px;font-size:15px;line-height:1.8}
+.cautions li + li{margin-top:8px}
+.cautions li::before{content:"";position:absolute;left:2px;top:.75em;width:8px;height:8px;border-radius:50%;background:var(--color-text-sub)}
+.again{display:flex;flex-direction:column;align-items:center;gap:10px;margin:28px 0 0;text-align:center}
+.again p{margin:0;font-size:var(--fs-small);color:var(--color-text-sub)}
+
+/* フッター（ライセンス＝AC-25・計測の説明） */
+.foot{padding:28px 0 calc(40px + env(safe-area-inset-bottom));border-top:1px solid var(--card-border);background:var(--color-white)}
+.foot p{margin:0;font-size:var(--fs-note);line-height:1.9;color:var(--color-text-sub)}
+.foot p + p{margin-top:8px}
+
+
+/* 処理中の「やめる」ボタンの上の余白 */
+.cancel{margin-top:18px}
+/* 項目カードへ移動したとき、上の固定バーに隠れないようにする */
+.axis{scroll-margin-top:64px}
+.vals .me .mark{display:inline-block;margin-left:6px;padding:0 6px;border-radius:6px;background:var(--vc-none-bg);color:var(--color-text-sub);font-size:11px;font-weight:700;vertical-align:middle;letter-spacing:0}
+
+/* ===== 盾の印（SVG） ===== */
+.shield-body{fill:rgba(124,196,255,.14);stroke:#7cc4ff;stroke-width:1.8;stroke-linejoin:round}
+.shield-check{fill:none;stroke:#7cc4ff;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+
+/* ===== レーダーチャート（SVG）。CSP で style 属性を使わないため、色はここでクラスに付ける ===== */
+.r-band{fill:var(--radar-band)}
+.r-band-line{fill:none;stroke:var(--radar-band-line);stroke-width:1}
+.r-dash{stroke-dasharray:3 3}
+.r-grid{fill:none;stroke:var(--radar-grid);stroke-width:1}
+.r-none-line{fill:none;stroke:var(--radar-none);stroke-width:1.8;stroke-dasharray:3 4}
+.r-me-fill{fill:var(--radar-me-fill);stroke:none}
+.r-me-line{stroke:var(--radar-me);stroke-width:2.5;stroke-linecap:round}
+.r-me-dot{fill:#ffffff;stroke:var(--radar-me);stroke-width:2}
+.r-none-dot{fill:none;stroke:var(--radar-none);stroke-width:1.8;stroke-dasharray:2 2}
+.r-label{fill:#c3c8d2;font-size:13px;text-anchor:middle;dominant-baseline:central}
+.r-score{fill:#ffffff;font-size:15px;font-weight:700;text-anchor:middle;dominant-baseline:central}
+.r-score-none{fill:#a3a9b4;font-size:12px}
+.r-link{fill:#7cc4ff;font-size:12px;font-weight:700;text-anchor:middle;dominant-baseline:central;text-decoration:underline}
+.r-hit{fill:transparent}

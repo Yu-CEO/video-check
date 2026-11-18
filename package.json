@@ -1,0 +1,9 @@
+{
+  "name": "video-check",
+  "private": true,
+  "description": "ショート動画のかんたん診断（ブラウザだけで動く）。依存ライブラリなし。テストは node --test",
+  "type": "module",
+  "scripts": {
+    "test": "node --test"
+  }
+}
