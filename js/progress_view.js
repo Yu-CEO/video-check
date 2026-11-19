@@ -6,6 +6,7 @@
  */
 import { el, safeMini, messageBox } from "./dom.js";
 import { formatClock, toMegabytes } from "./report_text.js";
+import { PHONE_WAIT_TEXT, PC_WAIT_TEXT } from "./config.js";
 import { PROGRESS_STEPS, PROGRESS_NOW, SAFE_MINI_RUNNING, RUN_FAILED } from "./messages.js";
 
 /**
@@ -38,17 +39,11 @@ function stepClass(index, currentIndex) {
 }
 
 /**
- * 処理中の画面を描く。
- * @param {HTMLElement} app 描く場所
- * @param {{name:string, durationSec:number, bytes:number}} info ファイルの情報
- * @param {Function} onCancel 「やめる」を押したときの処理
- * @returns {(stepIndex:number, percent:number) => void} 進み具合を書き換える関数
- * @example const update = renderProgress(app, info, cancel); update(1, 40);
+ * 進み具合のバー（今の手順の文・％・バー）を作る。
+ * @returns {{box:HTMLElement, nowText:HTMLElement, percentText:HTMLElement, track:HTMLElement, fill:HTMLElement}} 箱と、書き換える部品
+ * @example const bar = progressBar(); bar.percentText.textContent = "40%";
  */
-export function renderProgress(app, info, onCancel) {
-  app.textContent = "";
-  const top = el("section", "night proc top");
-  const wrap = el("div", "wrap");
+function progressBar() {
   const label = el("p", "progress-label");
   label.setAttribute("aria-live", "polite");
   const nowText = el("span", null, PROGRESS_NOW[0]);
@@ -61,8 +56,25 @@ export function renderProgress(app, info, onCancel) {
   track.setAttribute("aria-label", "進み具合");
   const fill = el("div", "bar-fill");
   track.append(fill);
-  const progress = el("div", "progress");
-  progress.append(label, track);
+  const box = el("div", "progress");
+  box.append(label, track);
+  return { box: box, nowText: nowText, percentText: percentText, track: track, fill: fill };
+}
+
+/**
+ * 処理中の画面を描く。
+ * @param {HTMLElement} app 描く場所
+ * @param {{name:string, durationSec:number, bytes:number}} info ファイルの情報
+ * @param {Function} onCancel 「やめる」を押したときの処理
+ * @returns {(stepIndex:number, percent:number) => void} 進み具合を書き換える関数
+ * @example const update = renderProgress(app, info, cancel); update(1, 40);
+ */
+export function renderProgress(app, info, onCancel) {
+  app.textContent = "";
+  const top = el("section", "night proc top");
+  const wrap = el("div", "wrap");
+  const bar = progressBar();
+  const progress = bar.box;
   const steps = el("ol", "stepper");
   const stepItems = PROGRESS_STEPS.map(function (name) {
     return el("li", null, name);
@@ -71,18 +83,22 @@ export function renderProgress(app, info, onCancel) {
   const cancel = el("button", "btn btn-hero-sub cancel", "やめる");
   cancel.type = "button";
   cancel.addEventListener("click", onCancel);
-  wrap.append(el("p", "eyebrow", "CHECKING"), el("h1", "title", "動画を調べています"), fileInfoBox(info), progress, steps,
+  wrap.append(el("p", "eyebrow", "ショート動画のかんたん診断"), el("h1", "title", "動画を調べています"), fileInfoBox(info), progress);
+  if (PHONE_WAIT_TEXT !== null) {   // スマホの時間は 実機で測った値が入るまで出さない（AC-20）
+    wrap.append(el("p", "remain", "この長さなら、スマホで" + PHONE_WAIT_TEXT + "ほど（PCは" + PC_WAIT_TEXT + "）"));
+  }
+  wrap.append(steps,
     el("p", "proc-note", "画面はこのままにしておいてください。ほかのアプリに切り替えると、止まることがあります。"),
-    cancel, safeMini(SAFE_MINI_RUNNING));
+    cancel, safeMini(SAFE_MINI_RUNNING, false));
   top.append(wrap);
   app.append(top);
   window.scrollTo(0, 0);
 
   return function update(stepIndex, percent) {
-    nowText.textContent = PROGRESS_NOW[stepIndex];
-    percentText.textContent = percent + "%";
-    fill.style.width = percent + "%";
-    track.setAttribute("aria-valuenow", String(percent));
+    bar.nowText.textContent = PROGRESS_NOW[stepIndex];
+    bar.percentText.textContent = percent + "%";
+    bar.fill.style.width = percent + "%";
+    bar.track.setAttribute("aria-valuenow", String(percent));
     stepItems.forEach(function (item, index) {
       item.className = stepClass(index, stepIndex);
     });
@@ -110,9 +126,9 @@ export function renderRunFailed(app, info, actions) {
   another.type = "button";
   another.addEventListener("click", actions.onPickAnother);
   buttons.append(retry, another);
-  wrap.append(el("p", "eyebrow", "CHECKING"), el("h1", "title", RUN_FAILED.title), fileInfoBox(info),
+  wrap.append(el("p", "eyebrow", "ショート動画のかんたん診断"), el("h1", "title", RUN_FAILED.title), fileInfoBox(info),
     messageBox(RUN_FAILED.heading, [RUN_FAILED.detail]), buttons,
-    safeMini("この端末の中だけで調べていました。外には何も送っていません"));
+    safeMini(SAFE_MINI_RUNNING, false));
   top.append(wrap);
   app.append(top);
   document.title = "調べられませんでした｜ショート動画のかんたん診断";

@@ -67,7 +67,7 @@ const VIEW_FILES = ["index.html"].concat(listFiles(join(ROOT, "js")).map(functio
 
 test("AC-2：「動画も結果もサーバーに送らず、保存もしません」の文が、最初の画面の文として用意されている", function () {
   assert.match(read("js/messages.js"), /動画も結果もサーバーに送らず、保存もしません/);
-  assert.match(read("js/start_view.js"), /safeBox\(\)/);
+  assert.match(read("js/start_view.js"), /safeMini\(SAFE_ONE_LINE/);
 });
 
 test("AC-4：CSP があり、外への送信先は同じサイトと GoatCounter だけ", function () {

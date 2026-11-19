@@ -1,13 +1,9 @@
 /*
- * dom.js：画面の部品を作る小さな道具（要素を作る・SVGを作る・盾の印・「送らない」の箱・見出し・フッター）
- * 主な関数：el、svgEl、shieldIcon、safeBox、safeMini、sectionTitle、messageBox、footer
+ * dom.js：画面の部品を作る小さな道具（要素を作る・SVGを作る・盾の印・「送らない」の1行・見出し・開閉・エラーのカード）
+ * 主な関数：el、svgEl、shieldIcon、safeMini、sectionTitle、foldBox、messageBox
  * 文字は textContent で入れる（ファイル名などに記号が入っていても、画面の部品として動かないようにするため）。
- * start_view.js・progress_view.js・report_view.js などから使われる。
+ * start_view.js・progress_view.js・report_view.js・more_view.js などから使われる。
  */
-import {
-  SAFE_TITLE, SAFE_FACE, SAFE_TEXT, FOOT_ANALYTICS, FOOT_LICENSE, FOOT_NOT_ADVICE
-} from "./messages.js";
-
 const SVG_NS = "http://www.w3.org/2000/svg";
 
 /**
@@ -62,48 +58,47 @@ export function shieldIcon(size) {
 }
 
 /**
- * 「送らない・保存しない」の箱（最初の画面。選ぶボタンのすぐ上＝AC-2）。
- * @returns {HTMLElement} 箱
- * @example safeBox()
- */
-export function safeBox() {
-  const box = el("div", "safe");
-  box.setAttribute("role", "note");
-  const body = el("div");
-  body.append(el("h2", null, SAFE_TITLE), el("p", "safe-face", SAFE_FACE), el("p", null, SAFE_TEXT));
-  box.append(shieldIcon(36), body);
-  return box;
-}
-
-/**
- * 処理中・結果の画面で出す、短い「送っていません」の1行。
+ * 「送らない・保存しない」などの短い1行（盾の印つき。はじめ・処理中・結果の画面で使う）。
  * @param {string} text 文
+ * @param {boolean} [strong] 文字を白く太くするなら true（はじめの画面の1行）
  * @returns {HTMLElement} 1行
- * @example safeMini("外には何も送っていません")
+ * @example safeMini("外には何も送っていません", false)
  */
-export function safeMini(text) {
-  const line = el("p", "safe-mini");
-  line.append(shieldIcon(18), el("span", null, text));
+export function safeMini(text, strong) {
+  const line = el("p", "safe-mini" + (strong ? " strong" : ""));
+  line.append(shieldIcon(20), el("span", null, text));
   return line;
 }
 
 /**
- * 区画の見出し（「01 わかること」の形）。
- * @param {string} number 番号の文字
+ * 区画の見出し。
  * @param {string} text 見出し
  * @returns {HTMLElement} 見出し
- * @example sectionTitle("01", "わかること（6つ）")
+ * @example sectionTitle("ほかの項目")
  */
-export function sectionTitle(number, text) {
-  const heading = el("h2", "sec-title");
-  heading.append(el("span", "num", number), text);
-  return heading;
+export function sectionTitle(text) {
+  return el("h2", "sec-title", text);
+}
+
+/**
+ * 押すと開く箱（details）。最初は閉じている。
+ * @param {string} title 見出し
+ * @param {HTMLElement[]} bodyNodes 開いたときに見せるもの
+ * @returns {HTMLElement} 箱
+ * @example foldBox("くわしく知りたい人へ", [el("p", null, "説明")])
+ */
+export function foldBox(title, bodyNodes) {
+  const box = el("details", "fold");
+  const body = el("div", "fold-body");
+  body.append(...bodyNodes);
+  box.append(el("summary", null, title), body);
+  return box;
 }
 
 /**
  * エラーや注意の白いカード（オレンジの印。赤は使わない）。読み上げソフトにもすぐ伝える。
  * @param {string} title 見出し
- * @param {string[]} lines 本文の行
+ * @param {string[]} lines 本文の行（2行以上のとき1行目はファイル名として太字にする）
  * @param {string} [extraClass] 追加の見た目
  * @returns {HTMLElement} カード
  * @example messageBox("3分以内の動画を選んでください", ["a.mp4（4分12秒）", "編集アプリで…"])
@@ -116,17 +111,4 @@ export function messageBox(title, lines, extraClass) {
     box.append(el("p", index === 0 && lines.length > 1 ? "file" : null, line));
   });
   return box;
-}
-
-/**
- * フッター（計測の説明・ライセンス表示＝AC-25・投資の助言ではない旨）。
- * @returns {HTMLElement} フッター
- * @example footer()
- */
-export function footer() {
-  const foot = el("footer", "foot");
-  const wrap = el("div", "wrap");
-  wrap.append(el("p", null, FOOT_ANALYTICS), el("p", null, FOOT_LICENSE), el("p", null, FOOT_NOT_ADVICE));
-  foot.append(wrap);
-  return foot;
 }

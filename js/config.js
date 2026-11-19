@@ -30,7 +30,11 @@ export const TAIL_SEC = 0.5;              // 「最後の0.5秒が無音で終�
 // ---- 文字起こし（仕様 2-③。押したときだけ読み込む＝AC-13・27） ----
 export const TRANSCRIBE_CHUNK_SEC = 30;   // Whisper は30秒ずつ聞くモデルなので、30秒ずつに分けて渡す
 export const MODEL_DOWNLOAD_MB = 66;      // 読み込む大きさ：モデル 約44MB＋文字起こしの部品 約22MB（vendor/ の実際の合計）
-export const TRANSCRIBE_SEC_PER_MIN = 20;  // 1分の動画の文字起こしにかかる秒数の目安（QA がPCで実測。2回目以降・モデル読み込み後）
+export const TRANSCRIBE_SEC_PER_MIN = 20;  // 1分の動画の文字起こしにかかる秒数の目安（PCで実測。2回目以降・モデル読み込み後）
+
+// ---- 待ち時間の言葉（仕様 7-2・AC-20）。60秒の動画・話す速さなしのとき ----
+export const PC_WAIT_TEXT = "約1分";      // PC の目安（実測済み）
+export const PHONE_WAIT_TEXT = null;     // スマホの目安。実機で測った値を入れるまで null＝画面に出さない（試作の仮の値は入れない）
 
 // ---- 基準の表（仕様 2-④） ----
 export const BASELINE_URL = "data/baseline.json";
@@ -40,8 +44,8 @@ export const DIRECTIONS = ["near", "more", "less"];   // 近いほど良い／�
 export const PERCENTILE_KEYS = ["p10", "p25", "p50", "p75", "p90"];   // 分布の目安（下位10%・25%・中央・75%・90%）
 
 // ---- 点数（仕様 2-④。計算は score.js、境目は README に書く） ----
-export const SCORE_OK = 80;     // 80点以上＝「基準の中央の範囲」（25〜75%に入ると80点以上になる）
-export const SCORE_NEAR = 50;   // 50〜79点＝「少し外れています」、50点未満＝「伸びしろあり」
+export const SCORE_OK = 80;     // 80点以上＝札「目安どおり」（25〜75%に入ると80点以上になる）
+export const SCORE_NEAR = 50;   // 50〜79点＝「少しずれ」、50点未満＝「伸びしろあり」
 
 // ---- ページを開いた回数の計測（GoatCounter。ページの場所だけを送る） ----
 export const ANALYTICS_ENDPOINT = "https://yuceo.goatcounter.com/count";

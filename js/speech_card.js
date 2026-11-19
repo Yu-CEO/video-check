@@ -6,7 +6,6 @@
  */
 import { el } from "./dom.js";
 import { MODEL_DOWNLOAD_MB, TRANSCRIBE_SEC_PER_MIN } from "./config.js";
-import { UNKNOWN_COUNT_MARK } from "./messages.js";
 
 const PERCENT = 100;
 
@@ -50,6 +49,20 @@ function button(className, text, onClick) {
 }
 
 /**
+ * 小さな札の並び（読み込む大きさ・かかる時間の目安）。
+ * @param {string[]} labels 札の文字
+ * @returns {HTMLElement} 札の並び
+ * @example tagList(["初回だけ 約66MB・Wi-Fiで"])
+ */
+function tagList(labels) {
+  const tags = el("div", "tags");
+  labels.forEach(function (label) {
+    tags.append(el("span", "tag", label));
+  });
+  return tags;
+}
+
+/**
  * 押す前のカードの中身（何をするか・大きさ・時間の目安・ボタン）。
  * @param {HTMLElement} card 付ける先
  * @param {Function} onStart 押したときの処理
@@ -57,12 +70,14 @@ function button(className, text, onClick) {
  * @example idleContent(card, start)
  */
 function idleContent(card, onStart) {
-  const seconds = TRANSCRIBE_SEC_PER_MIN === null ? UNKNOWN_COUNT_MARK : String(TRANSCRIBE_SEC_PER_MIN);
-  card.append(el("h3", null, "話す速さも測る（任意）"),
+  const labels = ["初回だけ 約" + MODEL_DOWNLOAD_MB + "MB・Wi-Fiで"];
+  if (TRANSCRIBE_SEC_PER_MIN !== null) {   // 測るまでは時間の札を出さない（仕様 7-3）
+    labels.push("1分の動画で約" + TRANSCRIBE_SEC_PER_MIN + "秒");
+  }
+  card.append(el("h3", null, "話す速さも測る（入れなくてもOK）"),
     el("p", null, "動画の声を文字にして、1秒あたりの文字数を出します。初めてのときだけ、文字起こしのモデルをこのサイトから読み込みます。声も文字も外には送りません。"),
-    el("span", "size", "読み込む大きさ 約" + MODEL_DOWNLOAD_MB + "MB・Wi-Fi がおすすめ"),
-    el("span", "size", "目安：1分の動画で約" + seconds + "秒"),
-    button("btn btn-main", "話す速さも測る（約" + MODEL_DOWNLOAD_MB + "MB）", onStart),
+    tagList(labels),
+    button("btn btn-main", "話す速さも測る", onStart),
     el("p", null, "押さなくても、ほかの5つの結果はそのまま見られます。"));
 }
 
@@ -82,8 +97,8 @@ function busyContent(card, speech, onCancel) {
     ? Math.round(MODEL_DOWNLOAD_MB * speech.percent / PERCENT) + "MB / " + MODEL_DOWNLOAD_MB + "MB（モデル）"
     : "文字起こし";
   card.append(heading, lightProgress(label, speech.percent),
-    el("p", null, loading ? "読み込みは初めての1回だけです。次からはすぐ始まります。待つあいだも、下の結果は見られます。"
-      : "画面はこのままでお待ちください。下の結果はそのまま見られます。"),
+    el("p", null, loading ? "読み込みは初めての1回だけです。次からはすぐ始まります。待つあいだも、上の結果は見られます。"
+      : "画面はこのままでお待ちください。上の結果はそのまま見られます。"),
     button("btn btn-sub", "やめる", onCancel));
 }
 
@@ -99,7 +114,7 @@ export function speechCard(speech, actions) {
   card.setAttribute("aria-live", "polite");
   if (speech.phase === "noaudio") {
     card.classList.add("is-done");
-    card.append(el("h3", null, "話す速さ・無音は測れませんでした"),
+    card.append(el("h3", null, "話す速さ・音のない時間は測れませんでした"),
       el("p", null, "この動画には音声が入っていないか、取り出せませんでした。映像の4つの項目だけを出しています。声やBGMを入れた動画なら、6つすべてを調べられます。"));
   } else if (speech.phase === "idle") {
     idleContent(card, actions.onStart);

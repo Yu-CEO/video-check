@@ -1,6 +1,6 @@
 /*
  * video_loader.test.js：js/video_loader.js のうち、画面なしで動く確認（種類・大きさ・長さ）の自動テスト（AC-6・7）
- * <video> で実際に開く部分は、ブラウザでの確認（QA）で見る。
+ * <video> で実際に開く部分は、ブラウザでの目視確認で見る。
  * 実行方法：video-check フォルダで `node --test`
  */
 import test from "node:test";

@@ -1,29 +1,26 @@
 /*
- * radar_chart.js：6つの項目の点数をレーダーチャート（SVG）で描く
+ * radar_chart.js：6つの項目の「全体の形」をレーダーチャート（SVG）で描く（軸の数字・点数は描かない）
  * 主な関数：radarChart（チャートを作る）、pointOnAxis（軸の上の点の位置。純粋な計算）
- * 外側の帯（点数80〜100）が「基準の中央の範囲」。未測定の軸は灰色の点線で中心を通し、ラベルを「未測定」にする（第21回）。
+ * 外側の帯（点数80〜100）が「伸びる動画の多く」。未測定の軸は灰色の点線で中心を通し、ラベルに「未測定」を足す。
  * 色は css/style.css の .r-* のクラスで付ける（CSP で style 属性を使わないため）。report_view.js から使われる。
  */
 import { svgEl } from "./dom.js";
 import { AXIS_IDS, SCORE_OK } from "./config.js";
-import { AXIS_TEXT } from "./messages.js";
+import { AXIS_TEXT, LEVEL_LABEL } from "./messages.js";
+import { levelOf } from "./score.js";
 
 // 図の大きさ（SVG の中の単位）。ラベルが360px幅でもはみ出さない余白をとる
 const WIDTH = 320;
-const HEIGHT = 300;
+const HEIGHT = 280;
 const CENTER_X = 160;
-const CENTER_Y = 150;
-const RADIUS = 88;
+const CENTER_Y = 140;
+const RADIUS = 84;
 const LABEL_OFFSET = 30;      // 軸の先からラベルまでの距離
 const MIN_DRAW_SCORE = 4;     // 0点でも点が中心に埋もれないよう、描くときだけ4点の位置に置く
 const GRID_STEPS = [0.25, 0.5, 0.75];
 const DOT_RADIUS = 4;           // 点の大きさ（半径）
-const LABEL_NAME_SHIFT_Y = -8;  // 軸の名前は、ラベルの位置より少し上に出す
-const LABEL_SCORE_SHIFT_Y = 10; // 点数は、軸の名前のすぐ下に出す
-const LINK_TEXT_SHIFT_Y = 30;   // 「測る ›」は点数の下に出す
-const LINK_HIT_TOP_Y = 14;      // 「測る ›」の押せる四角の上端（ラベルの位置から下へ）
-const LINK_HIT_WIDTH = 56;      // 押せる四角の幅（文字より広くとる）
-const LINK_HIT_HEIGHT = 44;     // 押せる四角の高さ（押しやすさの目安 44px 以上）
+const LABEL_NAME_SHIFT_Y = -8;  // 未測定の軸は、名前をラベルの位置より少し上に出す
+const LABEL_NONE_SHIFT_Y = 10;  // 「未測定」は名前のすぐ下に出す
 const FULL_SCORE = 100;
 
 /**
@@ -137,50 +134,39 @@ function drawMine(svg, scores) {
 }
 
 /**
- * 軸の名前と点数のラベルを描く。話す速さが未測定で測れるときは「測る ›」のリンクを付ける。
+ * 軸の名前のラベルを描く（数字・点数は描かない＝AC-36）。未測定の軸は名前の下に「未測定」を足す。
  * @param {SVGElement} svg 描く先
  * @param {object} scores 項目ごとの点数
- * @param {Function|null} onTempoLink 「測る ›」を押したときの処理（出さないときは null）
  * @returns {void}
- * @example drawLabels(svg, scores, null)
+ * @example drawLabels(svg, scores)
  */
-function drawLabels(svg, scores, onTempoLink) {
+function drawLabels(svg, scores) {
   AXIS_IDS.forEach(function (axisId, index) {
     const position = pointOnAxis(index, RADIUS + LABEL_OFFSET);
     const x = position[0].toFixed(1);
-    const score = scores[axisId];
-    svg.append(svgEl("text", { x: x, y: (position[1] + LABEL_NAME_SHIFT_Y).toFixed(1), class: "r-label" }, AXIS_TEXT[axisId].short));
-    svg.append(svgEl("text", { x: x, y: (position[1] + LABEL_SCORE_SHIFT_Y).toFixed(1), class: score === null ? "r-score r-score-none" : "r-score" },
-      score === null ? "未測定" : String(score)));
-    if (score === null && axisId === "tempo" && onTempoLink) {
-      const link = svgEl("a", { href: "#speech-sec", "aria-label": "話す速さを測るボタンへ" });
-      // 押せる範囲を44px以上にするため、透明な四角を重ねる
-      link.append(svgEl("rect", { x: (position[0] - LINK_HIT_WIDTH / 2).toFixed(1), y: (position[1] + LINK_HIT_TOP_Y).toFixed(1),
-        width: LINK_HIT_WIDTH, height: LINK_HIT_HEIGHT, class: "r-hit" }));
-      link.append(svgEl("text", { x: x, y: (position[1] + LINK_TEXT_SHIFT_Y).toFixed(1), class: "r-link" }, "測る ›"));
-      link.addEventListener("click", function (event) {
-        event.preventDefault();
-        onTempoLink();
-      });
-      svg.append(link);
+    const missing = scores[axisId] === null;
+    const nameY = missing ? position[1] + LABEL_NAME_SHIFT_Y : position[1];
+    svg.append(svgEl("text", { x: x, y: nameY.toFixed(1), class: "r-label" }, AXIS_TEXT[axisId].short));
+    if (missing) {
+      svg.append(svgEl("text", { x: x, y: (position[1] + LABEL_NONE_SHIFT_Y).toFixed(1), class: "r-none-text" }, "未測定"));
     }
   });
 }
 
 /**
- * レーダーチャートを作る。
+ * 「全体の形」のレーダーチャートを作る（数字は出さず形だけ）。
  * @param {object} scores 項目ごとの点数（未測定は null）
- * @param {Function|null} onTempoLink 「測る ›」を押したときの処理（出さないときは null）
  * @returns {SVGElement} チャート
- * @example radarChart({opening:30, cuts:60, tempo:null, silence:92, length:88, loop:85}, scrollToSpeech)
+ * @example radarChart({opening:30, cuts:60, tempo:null, silence:92, length:88, loop:85})
  */
-export function radarChart(scores, onTempoLink) {
+export function radarChart(scores) {
   const description = AXIS_IDS.map(function (axisId) {
-    return AXIS_TEXT[axisId].short + " " + (scores[axisId] === null ? "未測定" : scores[axisId] + "点");
+    const level = scores[axisId] === null ? "未測定" : LEVEL_LABEL[levelOf(scores[axisId])];
+    return AXIS_TEXT[axisId].short + " " + level;
   }).join("、");
-  const svg = svgEl("svg", { viewBox: "0 0 " + WIDTH + " " + HEIGHT, class: "radar", role: "img", "aria-label": "レーダーチャート。" + description });
+  const svg = svgEl("svg", { viewBox: "0 0 " + WIDTH + " " + HEIGHT, class: "radar", role: "img", "aria-label": "全体の形。" + description });
   drawFrame(svg, scores);
   drawMine(svg, scores);
-  drawLabels(svg, scores, onTempoLink);
+  drawLabels(svg, scores);
   return svg;
 }

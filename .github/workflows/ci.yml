@@ -4,7 +4,7 @@
 #   2. 機密チェック（ci/confidential_check.py）
 #   3. 1と2が合格し、Web公開がオンのときだけ、GitHub Pages に公開する
 # Web公開をオンにする方法：リポジトリの Settings → Secrets and variables → Actions → Variables に
-#   DEPLOY_PAGES = true を登録する（CEOが公開を決めたソフトだけ）
+#   DEPLOY_PAGES = true を登録する（公開すると決めたソフトだけ）
 # 機密の言葉：Settings → Secrets and variables → Actions → Secrets に CONFIDENTIAL_WORDS（1行に1語）を登録する。
 #   登録していないと、機密チェックは --require-words により「NG」で止まる（登録忘れのまま合格にしないため）
 

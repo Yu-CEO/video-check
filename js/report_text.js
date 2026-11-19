@@ -1,13 +1,10 @@
 /*
- * report_text.js：レポートに出す数字の書き方と、まとめの一文・解説の向きを決める（文字を作るだけ）
+ * report_text.js：レポートに出す数字の書き方と、解説の向きを決める（文字を作るだけ）
  * 主な関数：formatValue（値の書き方）、formatRange（基準の範囲）、formatClock・formatElapsed（時間）、
- *   countText（本数。空なら「○本」）、adviceSide（基準より少ない側か多い側か）、summaryLines（まとめの一文）
+ *   adviceSide（基準より少ない側か多い側か）
  * 画面に触らない純粋な処理なので、tests/report_text.test.js で画面なしに確かめられる。
- * report_view.js・axis_card.js・progress_view.js から使われる。
+ * report_view.js・key_card.js・axis_card.js・main.js・progress_view.js から使われる。
  */
-import { AXIS_IDS, SCORE_OK } from "./config.js";
-import { AXIS_TEXT, UNKNOWN_COUNT_MARK } from "./messages.js";
-
 const SECONDS_PER_MINUTE = 60;
 const BYTES_PER_MB = 1024 * 1024;
 const ONE_DECIMAL_AXES = ["cuts", "tempo", "silence", "opening"];   // 小数1桁で見せる項目
@@ -97,16 +94,6 @@ export function formatRange(axisId, axis) {
 }
 
 /**
- * 基準のもとにした動画の本数。表に数がない（null）あいだは「○本」と出す。
- * @param {number|null} count 本数
- * @returns {string} 表示用の文字
- * @example countText(null) // "○本"
- */
-export function countText(count) {
-  return (count === null || count === undefined ? UNKNOWN_COUNT_MARK : String(count)) + "本";
-}
-
-/**
  * 解説に使う側（基準より少ない側＝low、多い側＝high）を決める。
  * @param {string} direction 向き（near・less・more）
  * @param {number} value 測った値
@@ -122,37 +109,4 @@ export function adviceSide(direction, value, median) {
     return "low";
   }
   return value < median ? "low" : "high";
-}
-
-/**
- * まとめの一文と、いちばん伸びしろがある項目を決める。
- * @param {object} scores 項目ごとの点数（未測定は null）
- * @returns {{main:string, missing:string[], worstId:string|null}} 一文・未測定の項目名・いちばん点数の低い項目
- * @example summaryLines({opening:30, cuts:90, tempo:null, silence:90, length:90, loop:90}).worstId // "opening"
- */
-export function summaryLines(scores) {
-  const measured = AXIS_IDS.filter(function (axisId) {
-    return scores[axisId] !== null && scores[axisId] !== undefined;
-  });
-  const okCount = measured.filter(function (axisId) {
-    return scores[axisId] >= SCORE_OK;
-  }).length;
-  const missing = AXIS_IDS.filter(function (axisId) {
-    return !measured.includes(axisId);
-  }).map(function (axisId) {
-    return AXIS_TEXT[axisId].name;
-  });
-  let main = "調べた" + measured.length + "つのうち、" + okCount + "つが基準の中央の範囲でした。";
-  if (measured.length > 0 && okCount === measured.length) {
-    main = "調べた" + measured.length + "つの項目が、すべて基準の中央の範囲でした。";
-  } else if (okCount === 0) {
-    main = "基準の中央の範囲に入った項目は、まだありません。1つずつ直せば十分です。";
-  }
-  let worstId = null;
-  if (okCount < measured.length) {
-    worstId = measured.slice().sort(function (a, b) {
-      return scores[a] - scores[b];
-    })[0];
-  }
-  return { main: main, missing: missing, worstId: worstId };
 }

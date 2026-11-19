@@ -1,8 +1,9 @@
 /*
  * main.js：入口。全体の流れだけを書く
- *   1. ページを開いたら、基準の表を読み始め、はじめの画面を出し、開いた回数を1回だけ数える
+ *   1. ページを開いたら、基準の表を読み始め、はじめの画面（問いかけ・見方の2択）を出し、開いた回数を1回だけ数える
  *   2. 動画が選ばれたら：種類・大きさを確かめる → 開く（長さ・形式）→ 映像と音を測る → 基準と比べて点数 → レポート
  *   3. 「話す速さも測る」が押されたら：文字起こし → 話す速さ → 点数を出し直してレポートを描き直す
+ *   4. 結果の画面で「〜として見る」が押されたら：見方だけ変えて描き直す（測り直さない）
  * 細かい処理は各ファイルに任せる（測る＝analyze.js、点数＝score.js、画面＝*_view.js）。動画・結果はメモリの中だけに置く。
  */
 import { checkFileBasics, openVideo, closeVideo } from "./video_loader.js";
@@ -10,7 +11,8 @@ import { analyzeVideo, progressPercent } from "./analyze.js";
 import { loadBaseline } from "./baseline.js";
 import { scoreAll } from "./score.js";
 import { measureSpeakingRate, cancelTranscription } from "./transcribe.js";
-import { renderStart, updateStartSource } from "./start_view.js";
+import { renderStart, updateStartMore } from "./start_view.js";
+import { DEFAULT_MODE, otherMode } from "./view_mode.js";
 import { renderProgress, renderRunFailed } from "./progress_view.js";
 import { renderReport, updateSpeechSection } from "./report_view.js";
 import { formatElapsed, toMegabytes } from "./report_text.js";
@@ -19,7 +21,15 @@ import { countPageView } from "./analytics.js";
 const app = document.getElementById("app");
 const fileInput = document.getElementById("file");
 // 今の状態。ページを閉じると消える（ブラウザの保存場所には書かない＝AC-5）
-const state = { baselinePromise: loadBaseline(), baselineResult: null, run: null, report: null, speechRun: null };
+// mode＝見方（fan＝好きな動画・最初／maker＝自分で作った動画）。結果の言い方と並び順だけが変わり、測り直さない
+const state = {
+  baselinePromise: loadBaseline(),   // 基準の表を読む約束（読み終わりを待つのに使う）
+  baselineResult: null,              // 読めた結果（まだなら null）
+  run: null,                         // 今の測定（「やめる」の印を持つ）
+  report: null,                      // 結果の材料
+  speechRun: null,                   // 今の文字起こし
+  mode: DEFAULT_MODE                 // 見方
+};
 const COMPARE_STEP = 3;   // 進み具合の4つめの手順「基準と比べる」
 
 /**
@@ -47,7 +57,10 @@ function showStart(errorKey, errorFile) {
   cancelTranscription();
   state.run = null;
   state.report = null;
-  renderStart(app, { errorKey: errorKey, errorFile: errorFile, baseline: currentBaseline(), onPick: openPicker });
+  renderStart(app, {
+    mode: state.mode, errorKey: errorKey, errorFile: errorFile, baseline: currentBaseline(), onPick: openPicker,
+    onModeChange: function (mode) { state.mode = mode; }
+  });
   window.scrollTo(0, 0);
 }
 
@@ -87,7 +100,8 @@ function buildReport(file, durationSec, measured, startedAt) {
     hasSound: measured.hasSound,
     endsSilent: measured.endsSilent,
     audio: measured.audio,
-    speech: { phase: measured.hasSound ? "idle" : "noaudio", percent: 0 }
+    speech: { phase: measured.hasSound ? "idle" : "noaudio", percent: 0 },
+    mode: state.mode
   };
 }
 
@@ -141,8 +155,20 @@ async function checkVideo(file) {
 const reportActions = {
   onRestart: function () { showStart("", ""); },
   onSpeechStart: startSpeech,
-  onSpeechCancel: cancelSpeech
+  onSpeechCancel: cancelSpeech,
+  onSwitchMode: switchMode
 };
+
+/**
+ * 見方を切り替えて、測り直さずに結果を描き直す（画面の位置は保つ）。
+ * @returns {void}
+ * @example switchMode()
+ */
+function switchMode() {
+  state.mode = otherMode(state.mode);
+  state.report.mode = state.mode;
+  showReport(true);
+}
 
 /**
  * レポートを描く。話す速さが測れたあとは、画面の位置を保ったまま描き直す。
@@ -222,6 +248,6 @@ state.baselinePromise.then(function (result) {
   if (!result.ok) {
     console.warn("基準の表が読めませんでした：" + result.reason);
   }
-  updateStartSource(currentBaseline());
+  updateStartMore(currentBaseline());
 });
 countPageView();

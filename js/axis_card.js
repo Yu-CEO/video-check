@@ -1,13 +1,13 @@
 /*
- * axis_card.js：項目ごとのカード（名前・札・何を測ったか・あなたの値・基準の範囲・ものさし・一言・直すなら・点数）を作る
- * 主な関数：axisCard（カード）、scalePosition（ものさしの上の位置％。純粋な計算）
- * 「伸びしろあり」の項目は「直すなら」を一言より先に、薄いオレンジの箱で出す（第21回）。
+ * axis_card.js：「ほかの項目」の1行（押すと開く。値・目安の範囲・ものさし・一言・直すなら／見てみて・点数）を作る
+ * 主な関数：axisItem（1行）、scalePosition（ものさしの上の位置％。純粋な計算）
+ * 見方（自分の動画／好きな動画）で、開いたときの「直すなら」と「見てみて」が変わる（仕様 7-3）。
  * report_view.js から使われる。
  */
 import { el } from "./dom.js";
 import { levelOf } from "./score.js";
 import { formatValue, unitFor, formatRange, adviceSide } from "./report_text.js";
-import { AXIS_TEXT, LEVEL_LABEL, DIRECTION_LABEL } from "./messages.js";
+import { AXIS_TEXT, LEVEL_LABEL, HINT_FIX, HINT_LOOK } from "./messages.js";
 
 const SCALE_PADDING = 0.3;   // ものさしは基準の10〜90%の幅を、左右に30%ずつ広げて描く（外れた値も見えるように）
 const PERCENT = 100;
@@ -30,30 +30,6 @@ export function scalePosition(value, percentiles) {
 }
 
 /**
- * ものさし（全体の帯・基準の中央の半分＝緑・中央の線・自分の丸）を作る。
- * @param {string} axisId 項目の名前
- * @param {number} value 測った値
- * @param {object} axis 基準の表の1項目
- * @returns {HTMLElement} ものさし
- * @example scaleBar("length", 48, baseline.axes.length)
- */
-function scaleBar(axisId, value, axis) {
-  const percentiles = axis.percentiles;
-  const bar = el("div", "scale");
-  bar.setAttribute("aria-hidden", "true");
-  const band = el("span", "band");
-  band.style.left = scalePosition(percentiles.p25, percentiles) + "%";
-  band.style.width = (scalePosition(percentiles.p75, percentiles) - scalePosition(percentiles.p25, percentiles)) + "%";
-  const middle = el("span", "mid");
-  middle.style.left = scalePosition(percentiles.p50, percentiles) + "%";
-  const dot = el("span", "dot");
-  dot.style.left = scalePosition(value, percentiles) + "%";
-  const ends = scaleEndWords(axisId, axis.direction);
-  bar.append(el("span", "track"), band, middle, dot, el("span", "lbl l", ends[0]), el("span", "lbl r", ends[1]));
-  return bar;
-}
-
-/**
  * ものさしの左右の言葉。
  * @param {string} axisId 項目の名前
  * @param {string} direction 向き
@@ -67,11 +43,33 @@ function scaleEndWords(axisId, direction) {
   if (direction === "less") {
     return ["少ない", "多い"];
   }
-  return direction === "more" ? ["低い", "高い"] : ["少ない・短い", "多い・長い"];
+  return direction === "more" ? ["違う", "似ている"] : ["少ない・短い", "多い・長い"];
 }
 
 /**
- * 「あなたの動画」と「基準の中央の範囲」の2つの値。
+ * ものさし（全体の帯・伸びる動画の多く＝緑・自分の丸）を作る。
+ * @param {string} axisId 項目の名前
+ * @param {number} value 測った値
+ * @param {object} axis 基準の表の1項目
+ * @returns {HTMLElement} ものさし
+ * @example scaleBar("length", 48, baseline.axes.length)
+ */
+function scaleBar(axisId, value, axis) {
+  const percentiles = axis.percentiles;
+  const bar = el("div", "scale");
+  bar.setAttribute("aria-hidden", "true");
+  const band = el("span", "band");
+  band.style.left = scalePosition(percentiles.p25, percentiles) + "%";
+  band.style.width = (scalePosition(percentiles.p75, percentiles) - scalePosition(percentiles.p25, percentiles)) + "%";
+  const dot = el("span", "dot");
+  dot.style.left = scalePosition(value, percentiles) + "%";
+  const ends = scaleEndWords(axisId, axis.direction);
+  bar.append(el("span", "track"), band, dot, el("span", "lbl l", ends[0]), el("span", "lbl r", ends[1]));
+  return bar;
+}
+
+/**
+ * 「入れた動画」と「伸びる動画の多く」の2つの値。
  * @param {string} axisId 項目の名前
  * @param {number|null} value 測った値
  * @param {object|null} axis 基準の表の1項目（読めないときは null。単位は messages.js の控えを使う）
@@ -95,78 +93,73 @@ function valuePair(axisId, value, axis) {
       mineValue.append(el("span", "mark", "目安"));
     }
   }
-  mine.append(el("dt", null, "あなたの動画"), mineValue);
+  mine.append(el("dt", null, "入れた動画"), mineValue);
   const base = el("div");
-  const baseValue = el("dd", "base", axis ? formatRange(axisId, axis) : "読めませんでした");
-  if (axis) {
-    baseValue.append(el("small", null, "基準の真ん中の半分"));
-  }
-  base.append(el("dt", null, "基準の中央の範囲"), baseValue);
+  base.append(el("dt", null, "伸びる動画の多く"), el("dd", "base", axis ? formatRange(axisId, axis) : "読めませんでした"));
   list.append(mine, base);
   return list;
 }
 
 /**
- * 一言と「直すなら」を付ける（伸びしろありは「直すなら」を先に）。
- * @param {HTMLElement} card 付ける先
+ * 一言と、見方に合わせた「直すなら」または「見てみて」を付ける。
+ * @param {HTMLElement} body 付ける先
  * @param {string} axisId 項目の名前
- * @param {number} value 測った値
- * @param {object} axis 基準の表の1項目
- * @param {string} level 札の種類
+ * @param {{value:number, axis:object, level:string, mode:string}} detail 値・基準・札・見方
  * @returns {void}
- * @example appendAdvice(card, "opening", 3, axis, "far")
+ * @example appendAdvice(body, "opening", {value:3, axis, level:"far", mode:"maker"})
  */
-function appendAdvice(card, axisId, value, axis, level) {
+function appendAdvice(body, axisId, detail) {
   const text = AXIS_TEXT[axisId];
-  if (level === "ok") {
-    card.append(el("p", "say", text.ok));
+  if (detail.level === "ok") {
+    body.append(el("p", "say", detail.mode === "maker" ? text.ok : text.ok + text.why));
     return;
   }
-  const side = adviceSide(axis.direction, value, axis.percentiles.p50);
-  const say = el("p", "say", text[side].replace("{s}", level === "near" ? "少し" : ""));
+  const side = adviceSide(detail.axis.direction, detail.value, detail.axis.percentiles.p50);
+  body.append(el("p", "say", text[side].replace("{s}", detail.level === "near" ? "少し" : "")));
   const hint = el("div", "hint");
-  hint.append(el("b", null, "直すなら"), side === "low" ? text.hintLow : text.hintHigh);
-  if (level === "far") {
-    hint.classList.add("first");
-    card.append(hint, say);
+  if (detail.mode === "maker") {
+    hint.append(el("b", null, HINT_FIX), side === "low" ? text.hintLow : text.hintHigh);
   } else {
-    card.append(say, hint);
+    hint.append(el("b", null, HINT_LOOK), text.look);
   }
+  body.append(hint);
 }
 
 /**
- * 項目のカードを作る。
+ * 項目の行を作る（押すと開く）。
  * @param {string} axisId 項目の名前
- * @param {{value:number|null, score:number|null, axis:object|null, missingReason:string, tailNote:string}} item
- *   値・点数・基準（読めないときは null）・未測定の理由・ループの補足
- * @returns {HTMLElement} カード
- * @example axisCard("length", {value:48, score:88, axis, missingReason:"", tailNote:""})
+ * @param {{value:number|null, score:number|null, axis:object|null, missingReason:string, noBaselineText:string, tailNote:string, mode:string}} item
+ *   値・点数・基準（読めないときは null）・未測定の理由・基準が読めないときの文・ループの補足・見方
+ * @returns {HTMLElement} 行
+ * @example axisItem("length", {value:48, score:88, axis, missingReason:"", noBaselineText:"", tailNote:"", mode:"fan"})
  */
-export function axisCard(axisId, item) {
+export function axisItem(axisId, item) {
   const text = AXIS_TEXT[axisId];
   const level = item.axis ? levelOf(item.score) : "none";
-  const card = el("article", "card axis lv-" + level);
-  card.id = "ax-" + axisId;
-  const head = el("div", "axis-head");
-  head.append(el("h3", null, text.name));
+  const row = el("details", "item lv-" + level);
+  row.id = "ax-" + axisId;
+  const summary = el("summary");
+  summary.append(el("span", "nm", text.name));
   if (item.axis) {
-    head.append(el("span", "badge", LEVEL_LABEL[level]));
+    summary.append(el("span", "badge", LEVEL_LABEL[level]));
   }
-  const direction = item.axis ? "（" + DIRECTION_LABEL[item.axis.direction] + "）" : "";
-  card.append(head, el("p", "axis-what", text.what + direction), valuePair(axisId, item.value, item.axis));
+  summary.append(el("span", "wt", text.what));
+  const body = el("div", "item-body");
+  body.append(valuePair(axisId, item.value, item.axis));
   if (item.value === null) {
-    card.append(el("p", "say", item.missingReason));
+    body.append(el("p", "say", item.missingReason));
   } else if (!item.axis) {
-    card.append(el("p", "say", "基準が読めないため、比べた解説は出せません。測った値だけを表示しています。"));
+    body.append(el("p", "say", item.noBaselineText));
   } else {
-    card.append(scaleBar(axisId, item.value, item.axis));
-    appendAdvice(card, axisId, item.value, item.axis, level);
+    body.append(scaleBar(axisId, item.value, item.axis));
+    appendAdvice(body, axisId, { value: item.value, axis: item.axis, level: level, mode: item.mode });
   }
   if (item.tailNote) {
-    card.append(el("p", "score", item.tailNote));
+    body.append(el("p", "score", item.tailNote));
   }
   if (item.axis && item.score !== null) {
-    card.append(el("p", "score", "点数 " + item.score + " / 100（基準の中央の範囲に入ると80以上）"));
+    body.append(el("p", "score", "点数 " + item.score + " / 100（伸びる動画の多くと同じなら80以上）"));
   }
-  return card;
+  row.append(summary, body);
+  return row;
 }
