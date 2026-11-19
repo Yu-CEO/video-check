@@ -13,7 +13,7 @@ import { fileURLToPath } from "node:url";
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const INITIAL_LIMIT_BYTES = 300 * 1024;        // AC-26：最初に読む量の上限 300KB
 const REPO_LIMIT_BYTES = 100 * 1024 * 1024;    // AC-30：リポジトリ全体の上限 100MB
-const SKIP_DIRS = [".git", "node_modules", ".venv"];
+const SKIP_DIRS = [".git", "node_modules", ".venv", "docs"];   // docs/ は公開しない（.gitignore）。QA の画面写真が入るので数えない
 
 /**
  * ファイルを文字として読む。

@@ -2,9 +2,11 @@
  * view_mode.js：「どんな動画を入れますか？」の2択と、結果の画面で見方を切り替えるボタンを作る
  * 主な関数：modeChoice（はじめの画面の2択）、switchViewButton（結果の画面の切り替え）、otherMode（もう一方の見方）
  * 見方は fan（好きな動画・最初の選び方）と maker（自分で作った動画）。処理は同じで、結果の言い方と並び順だけが変わる（仕様 7-2）。
+ * 2択カードは 絵＋名前。説明の文は画面の文字から外し、絵の読み上げ用の名前に入れている（〔v2.1〕仕様 8-3）。
  * 今どちらかは main.js が持つ。start_view.js・report_view.js から使われる。
  */
 import { el } from "./dom.js";
+import { modePicture } from "./pictures.js";
 import { MODE_CHOICE_TITLE, MODE_TEXT } from "./messages.js";
 
 export const DEFAULT_MODE = "fan";   // 動画を作らない人も使えるよう、最初は「好きな動画」
@@ -42,9 +44,9 @@ export function modeChoice(currentMode, onChange) {
       onChange(mode);
     });
     const text = el("span", "opt-t");
-    text.append(el("b", null, MODE_TEXT[mode].name), el("span", null, MODE_TEXT[mode].sub));
+    text.append(el("b", null, MODE_TEXT[mode].name));
     const box = el("span", "opt-box");
-    box.append(text);
+    box.append(modePicture(mode), text);
     label.append(input, box);
     list.append(label);
   });

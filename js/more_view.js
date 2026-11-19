@@ -5,11 +5,12 @@
  * 版番号・本数は出さない（作成日だけ出す）。start_view.js・report_view.js から使われる。
  */
 import { el, foldBox } from "./dom.js";
+import { axisPicture } from "./pictures.js";
 import { AXIS_IDS, MODEL_DOWNLOAD_MB } from "./config.js";
 import {
   AXIS_TEXT, SAFE_TEXT, FOOT_ANALYTICS, FOOT_LICENSE, FOOT_NOT_ADVICE, CAUTION_TRANSCRIBE, DEFAULT_SOURCE,
   MORE_TITLE, FOLD_AXES_TITLE, BASELINE_TRIAL, HOW_BASELINE_MADE, NO_GENRE_NOTE, BASELINE_RENEW, BASELINE_DATE_MISSING,
-  OTHERS_VIDEO_NOTE, SPEECH_LOAD_NOTE, PICKABLE_TEXT
+  OTHERS_VIDEO_NOTE, SPEECH_LOAD_NOTE, PICKABLE_TEXT, AXES_NOTE
 } from "./messages.js";
 
 /**
@@ -60,18 +61,16 @@ export function moreFold(baseline) {
 }
 
 /**
- * 「調べる6つのこと」の箱（名前と、何を測るか）。
+ * 「調べる6つのこと」の箱（絵＋名前だけ。説明の文は結果の各項目の中に移した）。
  * @returns {HTMLElement} 箱（最初は閉じている）
  * @example axesFold()
  */
 export function axesFold() {
   const list = el("ul", "axes6");
   AXIS_IDS.forEach(function (axisId) {
-    const text = AXIS_TEXT[axisId];
     const item = el("li");
-    const note = axisId === "tempo" ? "。測るかは結果の画面で選べます" : "";
-    item.append(el("b", null, text.name), el("span", null, text.what + note));
+    item.append(axisPicture(axisId), el("b", null, AXIS_TEXT[axisId].name));
     list.append(item);
   });
-  return foldBox(FOLD_AXES_TITLE, [list]);
+  return foldBox(FOLD_AXES_TITLE, [list, el("p", "axes6-note", AXES_NOTE)]);
 }

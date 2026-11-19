@@ -32,9 +32,8 @@ export const TRANSCRIBE_CHUNK_SEC = 30;   // Whisper は30秒ずつ聞くモデ�
 export const MODEL_DOWNLOAD_MB = 66;      // 読み込む大きさ：モデル 約44MB＋文字起こしの部品 約22MB（vendor/ の実際の合計）
 export const TRANSCRIBE_SEC_PER_MIN = 20;  // 1分の動画の文字起こしにかかる秒数の目安（PCで実測。2回目以降・モデル読み込み後）
 
-// ---- 待ち時間の言葉（仕様 7-2・AC-20）。60秒の動画・話す速さなしのとき ----
-export const PC_WAIT_TEXT = "約1分";      // PC の目安（実測済み）
-export const PHONE_WAIT_TEXT = null;     // スマホの目安。実機で測った値を入れるまで null＝画面に出さない（試作の仮の値は入れない）
+// ---- 待ち時間の言葉（仕様 8-2・AC-46）。60秒の動画・話す速さなしのとき ----
+export const PC_WAIT_TEXT = "約1分";      // PC の目安（実測済み）。スマホの時間は端末ごとの差が大きく、外れると信用を失うので画面に出さない（測った値は記録だけ）
 
 // ---- 基準の表（仕様 2-④） ----
 export const BASELINE_URL = "data/baseline.json";

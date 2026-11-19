@@ -6,7 +6,7 @@
  */
 import { el, safeMini, messageBox } from "./dom.js";
 import { formatClock, toMegabytes } from "./report_text.js";
-import { PHONE_WAIT_TEXT, PC_WAIT_TEXT } from "./config.js";
+import { PC_WAIT_TEXT } from "./config.js";
 import { PROGRESS_STEPS, PROGRESS_NOW, SAFE_MINI_RUNNING, RUN_FAILED } from "./messages.js";
 
 /**
@@ -84,10 +84,8 @@ export function renderProgress(app, info, onCancel) {
   cancel.type = "button";
   cancel.addEventListener("click", onCancel);
   wrap.append(el("p", "eyebrow", "ショート動画のかんたん診断"), el("h1", "title", "動画を調べています"), fileInfoBox(info), progress);
-  if (PHONE_WAIT_TEXT !== null) {   // スマホの時間は 実機で測った値が入るまで出さない（AC-20）
-    wrap.append(el("p", "remain", "この長さなら、スマホで" + PHONE_WAIT_TEXT + "ほど（PCは" + PC_WAIT_TEXT + "）"));
-  }
-  wrap.append(steps,
+  wrap.append(el("p", "remain", "PCなら" + PC_WAIT_TEXT + "ほど"),   // スマホの時間は端末ごとの差が大きく、外れると信用を失うので画面に出さない
+    steps,
     el("p", "proc-note", "画面はこのままにしておいてください。ほかのアプリに切り替えると、止まることがあります。"),
     cancel, safeMini(SAFE_MINI_RUNNING, false));
   top.append(wrap);

@@ -5,6 +5,8 @@
  * report_view.js から使われる。ボタンが押されたときの処理は main.js から受け取る。
  */
 import { el } from "./dom.js";
+import { speechPicture } from "./pictures.js";
+import { SPEECH_TEXT } from "./messages.js";
 import { MODEL_DOWNLOAD_MB, TRANSCRIBE_SEC_PER_MIN } from "./config.js";
 
 const PERCENT = 100;
@@ -75,7 +77,8 @@ function idleContent(card, onStart) {
     labels.push("1分の動画で約" + TRANSCRIBE_SEC_PER_MIN + "秒");
   }
   card.append(el("h3", null, "話す速さも測る（入れなくてもOK）"),
-    el("p", null, "動画の声を文字にして、1秒あたりの文字数を出します。初めてのときだけ、文字起こしのモデルをこのサイトから読み込みます。声も文字も外には送りません。"),
+    speechPicture(),   // 〔v2.1〕説明の文の代わりに図（声 → 文字 → 速さ）
+    el("p", null, SPEECH_TEXT.safe),
     tagList(labels),
     button("btn btn-main", "話す速さも測る", onStart),
     el("p", null, "押さなくても、ほかの5つの結果はそのまま見られます。"));

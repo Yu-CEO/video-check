@@ -43,6 +43,11 @@
   --fs-card-title:clamp(16px, 4.5vw, 18px); /* カード・項目の見出し */
   --fs-value:clamp(22px, 6.2vw, 28px);      /* 自分の測った値 */
   --fs-small:14px;                          /* 補足 */
+  --pic-on-night:#7cc4ff;         /* 〔v2.1〕紺の上の絵の線 */
+  --pic-on-light:#2563a8;         /* 〔v2.1〕明るい面の絵の線 */
+  --pic-key-night:#ffb36b;        /* 〔v2.1〕紺の上の「大事な1点」の印（オレンジ。赤は使わない） */
+  --pic-step-icon:36px;           /* 〔v2.1〕はじめの手順・2択カードの絵 */
+  --pic-axis-icon:28px;           /* 〔v2.1〕6つの項目の絵 */
   --fs-note:13px;                           /* 注意・くわしく（これより小さくしない） */
   --fs-button:16px;
   --fs-badge:13px;                          /* 「目安どおり」などの札 */
@@ -58,6 +63,7 @@
   --btn-height-sub:44px;          /* 小さいボタン・リンク・開閉（44px以上） */
   --btn-radius:12px;
   --btn-max:360px;
+  --radar-label-size:15px;        /* チャートの軸の文字（図の単位）。360pxの画面では図が約0.89倍に縮むので、15→約13.3pxで13px以上を保つ */
   --radar-max:360px;              /* 全体の形（チャート）の最大幅 */
 
   /* ===== 結果の札の色（赤は使わない＝責めない。白地で4.5:1以上） ===== */
@@ -126,21 +132,24 @@ a:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid var
 @media (min-width:520px){ .opt-list{grid-template-columns:1fr 1fr} }
 .opt{position:relative;display:block;cursor:pointer}
 .opt input{position:absolute;opacity:0;width:1px;height:1px}
-.opt-box{display:grid;grid-template-columns:24px minmax(0,1fr);gap:12px;align-items:start;min-height:64px;padding:12px 14px;border-radius:14px;
+.opt-box{display:grid;grid-template-columns:24px var(--pic-step-icon) minmax(0,1fr);gap:12px;align-items:center;min-height:64px;padding:12px 14px;border-radius:14px;
   background:var(--glass);border:1.5px solid rgba(195,200,210,.35)}
-.opt-box::before{content:"";width:22px;height:22px;margin-top:2px;border-radius:50%;border:2px solid rgba(195,200,210,.7)}
-.opt input:checked + .opt-box{border-color:var(--hero-accent);background:rgba(124,196,255,.12)}
+.opt-box::before{content:"";width:22px;height:22px;border-radius:50%;border:2px solid rgba(195,200,210,.7)}
+.opt input:checked + .opt-box{border-color:var(--hero-accent);background:rgba(124,196,255,.12);box-shadow:inset 0 0 0 1.5px var(--hero-accent)}   /* 選んだ印は色だけにしない（枠の太さと、まるの中の塗り） */
+.opt-box svg{width:var(--pic-step-icon);height:var(--pic-step-icon);color:var(--pic-on-night)}
 .opt input:checked + .opt-box::before{border-color:var(--hero-accent);background:var(--hero-accent);box-shadow:inset 0 0 0 4px var(--hero-bg-dark)}
 .opt input:focus-visible + .opt-box{outline:3px solid var(--color-focus);outline-offset:3px}
 .opt-t b{display:block;font-size:16px;line-height:1.5}
-.opt-t span{display:block;font-size:var(--fs-small);line-height:1.6;color:var(--hero-text-sub)}
 
-/* 3つの手順（選ぶ → 待つ → 分かる） */
-.flow{list-style:none;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:18px 0 0;padding:0;text-align:center}
-.flow li{padding:10px 4px;border-radius:12px;background:var(--glass);border:1px solid var(--glass-border)}
-.flow i{display:block;font-style:normal;font-size:var(--fs-note);font-weight:700;color:var(--hero-accent)}
+/* 3つの手順（絵＋ 選ぶ → 待つ → 分かる。矢印で結ぶ） */
+.flow{list-style:none;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:18px 0 0;padding:0;text-align:center}
+.flow li{position:relative;padding:10px 4px;border-radius:12px;background:var(--glass);border:1px solid var(--glass-border)}
+.flow li:not(:last-child)::after{content:"";position:absolute;right:-11px;top:50%;width:7px;height:7px;margin-top:-4px;
+  border-right:2px solid var(--hero-accent);border-top:2px solid var(--hero-accent);transform:rotate(45deg)}
+.flow svg{display:block;width:var(--pic-step-icon);height:var(--pic-step-icon);margin:0 auto 4px;color:var(--pic-on-night)}
 .flow b{display:block;font-size:15px;line-height:1.4}
-.flow small{display:block;margin-top:2px;font-size:var(--fs-note);line-height:1.45;color:var(--hero-text-sub);white-space:pre-line}
+.flow small{display:block;margin-top:2px;font-size:var(--fs-note);line-height:1.45;color:var(--hero-text-sub)}
+.pic-key{fill:var(--pic-key-night);stroke:var(--pic-key-night)}   /* 6つの点のうち光る1点（赤は使わない） */
 
 /* 「送らない・保存しない」などの1行（全文は「くわしく知りたい人へ」） */
 .safe-mini{display:flex;align-items:flex-start;gap:8px;margin:12px 0 0;font-size:var(--fs-small);line-height:1.6;color:var(--hero-text-sub)}
@@ -189,11 +198,12 @@ a:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid var
 .fold-body h3:first-child{margin-top:0}
 .fold-body p,.fold-body li{margin:0;font-size:var(--fs-note);line-height:1.85;color:var(--color-text-sub);overflow-wrap:anywhere}
 .fold-body p + p{margin-top:6px}
-.axes6{list-style:none;margin:0;padding:0}
-.axes6 li{padding:10px 0;border-top:1px solid var(--card-border)}
-.axes6 li:first-child{border-top:0;padding-top:0}
-.axes6 b{display:block;font-size:15px;color:var(--color-text)}
-.axes6 span{display:block;font-size:var(--fs-note);color:var(--color-text-sub)}
+/* 「調べる6つのこと」は 絵＋名前の 3×2 の図 */
+.axes6{list-style:none;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:0;padding:0}
+.axes6 li{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 4px;border-radius:12px;background:var(--color-gray);text-align:center}
+.axes6 svg{width:var(--pic-axis-icon);height:var(--pic-axis-icon);color:var(--pic-on-light)}
+.axes6 b{display:block;font-size:var(--fs-note);line-height:1.45;color:var(--color-text)}
+.fold-body .axes6-note{margin-top:10px}
 
 /* ===== ② 調べている ===== */
 .proc{min-height:100vh;min-height:100svh}
@@ -251,11 +261,16 @@ a:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid var
 /* ほかの項目（押すと開く。順番は見方ごとに1つ） */
 .item{background:var(--color-white);border:1px solid var(--card-border);border-radius:14px;scroll-margin-top:64px}
 .item + .item{margin-top:8px}
-.item > summary{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px;align-items:center;min-height:60px;padding:10px 14px;cursor:pointer;list-style:none}
+.item > summary{display:grid;grid-template-columns:var(--pic-axis-icon) minmax(0,1fr) auto;gap:4px 10px;align-items:center;min-height:56px;padding:10px 14px;cursor:pointer;list-style:none}
 .item > summary::-webkit-details-marker{display:none}
 .item > summary .nm{font-size:16px;font-weight:700;line-height:1.5}
-.item > summary .wt{grid-column:1 / -1;font-size:var(--fs-note);line-height:1.5;color:var(--color-text-sub)}
+.item > summary svg{width:var(--pic-axis-icon);height:var(--pic-axis-icon);color:var(--pic-on-light)}
+.nm-part{display:inline-block}   /* 長い項目名は「の」の後ろで折り返す（1文字だけ次の行に落ちない） */
+.item-body .wt{margin:12px 0 0;font-size:var(--fs-note);line-height:1.6;color:var(--color-text-sub)}
 .item-body{padding:0 14px 16px;border-top:1px solid var(--card-border)}
+/* 結果の見方の図（ものさしと丸3つ）。「ほかの項目」の上に1回だけ */
+.howto{margin:0 0 12px;padding:12px 0 6px;background:var(--color-white);border:1px solid var(--card-border);border-radius:14px}
+.howto svg{display:block;width:100%;max-width:360px;height:auto;margin:0 auto;aspect-ratio:320/104}
 .vals{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;margin:14px 0 0}
 .vals div{min-width:0}
 .vals dt{font-size:var(--fs-note);font-weight:700;color:var(--color-text-sub)}
@@ -283,6 +298,7 @@ a:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid var
 .speech{border-color:var(--accent);border-width:1.5px;scroll-margin-top:64px}
 .speech h3{display:flex;align-items:center;gap:8px;margin:0;font-size:var(--fs-card-title);font-weight:700}
 .speech p{margin:8px 0 0;font-size:15px;line-height:1.8;color:var(--color-text-sub)}
+.speech-pic{display:block;width:100%;max-width:280px;height:auto;margin:10px 0 0;aspect-ratio:280/66;color:var(--pic-on-light)}
 .tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
 .tag{display:inline-flex;align-items:center;padding:3px 10px;border-radius:999px;background:var(--vc-near-bg);color:var(--accent);font-size:var(--fs-note);font-weight:700}
 .speech .btn{margin-top:14px;max-width:none}
@@ -322,5 +338,5 @@ a:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid var
 .r-me-line{stroke:var(--radar-me);stroke-width:2.5;stroke-linecap:round}
 .r-me-dot{fill:#ffffff;stroke:var(--radar-me);stroke-width:2}
 .r-none-dot{fill:none;stroke:var(--radar-none);stroke-width:1.8;stroke-dasharray:2 2}
-.r-label{fill:var(--color-text);font-size:13px;font-weight:700;text-anchor:middle;dominant-baseline:central}
-.r-none-text{fill:var(--color-text-sub);font-size:13px;text-anchor:middle;dominant-baseline:central}
+.r-label{fill:var(--color-text);font-size:var(--radar-label-size);font-weight:700;text-anchor:middle;dominant-baseline:central}
+.r-none-text{fill:var(--color-text-sub);font-size:var(--radar-label-size);text-anchor:middle;dominant-baseline:central}

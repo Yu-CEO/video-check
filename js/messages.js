@@ -13,7 +13,7 @@ const BYTES_PER_MB = 1024 * 1024;
 // 上限を画面の言い方にしたもの（config.js の値を変えると、エラー文と最初の画面の案内も一緒に変わる）
 export const LIMIT_DURATION_TEXT = MAX_DURATION_SEC / SECONDS_PER_MINUTE + "分";
 export const LIMIT_SIZE_TEXT = MAX_FILE_BYTES / BYTES_PER_MB + "MB";
-export const PICK_NOTE = LIMIT_DURATION_TEXT + "・" + LIMIT_SIZE_TEXT + "まで。時間は60秒の動画のときの目安です。";
+export const PICK_NOTE = LIMIT_DURATION_TEXT + "・" + LIMIT_SIZE_TEXT + "まで。時間は60秒の動画の目安です。";
 export const PICKABLE_TEXT = "長さ" + LIMIT_DURATION_TEXT + "・大きさ" + LIMIT_SIZE_TEXT + "まで。mp4 がいちばん確実です。iPhone の動画（mov）も、ブラウザで開ければ調べられます。";
 
 // 最初の画面の「送らない・保存しない」の文
@@ -29,7 +29,7 @@ export const DEFAULT_SOURCE = "自分の動画＋許可を得た動画＋公開�
 // 見方（入れる動画の種類）。処理は同じで、結果の言い方と並び順だけが変わる（仕様 7-2）
 export const MODE_CHOICE_TITLE = "どんな動画を入れますか？";
 export const MODE_TEXT = {
-  fan: { name: "好きな動画", sub: "伸びる作りが分かる", switchTo: "好きな動画として見る（伸びる作りを知る）" },
+  fan: { name: "好きな動画", sub: "伸びる動画の作りが分かる", switchTo: "好きな動画として見る（伸びる作りを知る）" },
   maker: { name: "自分で作った動画", sub: "直すところが1つ分かる", switchTo: "自分の動画として見る（直すところを知る）" }
 };
 
@@ -138,9 +138,32 @@ export const CAUTION_BASELINE = "基準は伸びるショート動画の目安�
 export const CAUTION_TRANSCRIBE = "文字起こしは完全ではありません。話す速さは目安として見てください。";
 export const TAIL_SILENT_NOTE = "最後の0.5秒：無音で終わる（最後まで声や音があると、終わりに気づかれにくくなります）";
 export const TAIL_SOUND_NOTE = "最後の0.5秒：音あり";
-export const ITEMS_LEAD = { maker: "直したほうがよい順に並べています。押すと、くわしく開きます。", fan: "伸びる動画の作りに近い順に並べています。押すと、くわしく開きます。" };
+export const ITEMS_LEAD = { maker: "直したほうがよい順。押すと開きます。", fan: "伸びる作りに近い順。押すと開きます。" };
 export const ITEMS_LEAD_NO_BASELINE = "目安が読めないため、測った値だけです。";
 export const NO_BASELINE_EXPLAIN = "目安が読めないため、比べた解説は出せません。測った値だけを表示しています。";
+
+// 〔v2.1〕説明の文を絵にした所の文章（絵の読み上げ用の名前もここ。画面読み上げでは文が減らないようにする）
+export const START_LEAD = "伸びる動画の目安と、6つの点で比べます。";
+export const STEP_TEXT = [
+  { name: "選ぶ", label: "動画を1本選ぶ（スマホの動画の絵）" },
+  { name: "待つ", label: "待つ（砂時計の絵）" },
+  { name: "分かる", label: "6つの点のうち、大事な1点が分かる（1点が光る絵）" }
+];
+export const MODE_PICTURE_LABEL = {
+  fan: "動画を見て学ぶ絵。" + MODE_TEXT.fan.sub,
+  maker: "動画を直す絵。" + MODE_TEXT.maker.sub
+};
+export const AXES_NOTE = "話す速さを測るかは、結果の画面で選べます。";
+export const SCORE_NOTE = "（80以上で目安どおり）";
+export const HOWTO_TEXT = {
+  base: "伸びる動画の多く", ok: "目安どおり", near: "少しずれ", far: "伸びしろあり", mine: "＝入れた動画",
+  label: "結果の見方。緑の帯が伸びる動画の多く。丸が入れた動画の位置。帯の中なら目安どおり、帯の少し外なら少しずれ、遠いと伸びしろあり"
+};
+export const SPEECH_TEXT = {
+  voice: "声", letters: "文字", speed: "速さ",
+  label: "動画の声を文字にして、話す速さを出します（声から文字、文字から速さ）",
+  safe: "声も文字も外には送りません。"
+};
 
 // 次の行動（3ツール共通の言葉。仕様 7-5）
 export const NEXT_AGAIN = "別の動画でもう一度";

@@ -8,6 +8,7 @@
  */
 import { el, safeMini, sectionTitle, messageBox } from "./dom.js";
 import { radarChart } from "./radar_chart.js";
+import { howtoPicture } from "./pictures.js";
 import { axisItem } from "./axis_card.js";
 import { keyCard } from "./key_card.js";
 import { speechCard } from "./speech_card.js";
@@ -111,7 +112,9 @@ function itemsSection(report, keyAxisId) {
   if (noBaseline) {
     section.append(el("p", "sec-lead", ITEMS_LEAD_NO_BASELINE));
   } else if (keyAxisId !== null) {   // 1つも測れなかったときは「並べています」の説明を出さない
-    section.append(el("p", "sec-lead", ITEMS_LEAD[report.mode]));
+    const howto = el("div", "howto");
+    howto.append(howtoPicture());   // 結果の見方の図は、ここに1回だけ（〔v2.1〕仕様 8-5）
+    section.append(el("p", "sec-lead", ITEMS_LEAD[report.mode]), howto);
   }
   orderItems(report.mode, report.scores, keyAxisId).forEach(function (axisId) {
     section.append(axisItem(axisId, {

@@ -2,37 +2,40 @@
  * start_view.js：① はじめの画面（問いかけ・2択・3つの手順・動画を選ぶボタン・「送らない」の1行・エラー・畳んだ説明）を描く
  * 主な関数：renderStart（画面を描く）、updateStartMore（基準の表が読めたあとに「くわしく」だけ描き直す）
  * 選べなかったとき（3分超・200MB超・動画以外・開けない形式）は、同じ画面に理由と次にすることを出す（AC-6・7）。
- * スマホで待つ時間は、実機で測った値が config.js に入るまで出さない（AC-20）。
+ * 3つの手順は 絵＋「選ぶ／待つ／分かる」。待つ時間は「PC 約1分」だけ（スマホの時間は端末ごとの差が大きく、外れると信用を失うので画面に出さない）。
  * main.js から使われる。ボタンが押されたときの処理は main.js から受け取る。
  */
 import { el, safeMini, messageBox } from "./dom.js";
 import { modeChoice } from "./view_mode.js";
 import { moreFold, axesFold } from "./more_view.js";
-import { PHONE_WAIT_TEXT, PC_WAIT_TEXT } from "./config.js";
-import { START_ERRORS, PICK_NOTE, SAFE_ONE_LINE } from "./messages.js";
+import { stepPicture } from "./pictures.js";
+import { PC_WAIT_TEXT } from "./config.js";
+import { START_ERRORS, PICK_NOTE, SAFE_ONE_LINE, START_LEAD, STEP_TEXT } from "./messages.js";
 
 const PICK_ICON = '<svg viewBox="0 0 20 20" aria-hidden="true"><rect x="2" y="4" width="11" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M13 8.5 L18 6 V14 L13 11.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>';
 
 /**
- * 待つ時間の言葉（スマホの値がまだ無いあいだは PC だけ）。
+ * 待つ時間の言葉（PC だけ。スマホの時間は出さない）。
  * @returns {string} 例 "PC 約1分"
  * @example waitText()
  */
 function waitText() {
-  const pc = "PC " + PC_WAIT_TEXT;
-  return PHONE_WAIT_TEXT === null ? pc : "スマホ " + PHONE_WAIT_TEXT + "\n" + pc;
+  return "PC " + PC_WAIT_TEXT;
 }
 
 /**
- * 3つの手順（選ぶ → 待つ → 分かる）。
+ * 3つの手順（絵＋ 選ぶ → 待つ → 分かる）。「待つ」の下だけ時間を文字で出す。
  * @returns {HTMLElement} 手順の並び
  * @example stepsFlow()
  */
 function stepsFlow() {
   const flow = el("ol", "flow");
-  [["1", "選ぶ", "動画を1本"], ["2", "待つ", waitText()], ["3", "分かる", "大事な1点から"]].forEach(function (step) {
+  STEP_TEXT.forEach(function (step, index) {
     const item = el("li");
-    item.append(el("i", null, step[0]), el("b", null, step[1]), el("small", null, step[2]));
+    item.append(stepPicture(index), el("b", null, step.name));
+    if (index === 1) {
+      item.append(el("small", null, waitText()));
+    }
     flow.append(item);
   });
   return flow;
@@ -50,7 +53,7 @@ function heroPart(options) {
   const title = el("h1", "title");
   title.append(el("span", null, "伸びるショート動画は、"), el("span", null, "どこが違う？"));
   wrap.append(el("p", "eyebrow", "ショート動画のかんたん診断"), title,
-    el("p", "lead", "動画を1本入れるだけで、伸びる動画の目安と6つの点で比べます。"),
+    el("p", "lead", START_LEAD),
     modeChoice(options.mode, options.onModeChange), stepsFlow());
   const button = el("button", "btn btn-hero pick");
   button.type = "button";

@@ -11,7 +11,7 @@ import { join, dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   AXIS_TEXT, LEVEL_LABEL, MODE_TEXT, SAFE_TEXT, SAFE_ONE_LINE, CAUTION_BASELINE, OTHERS_VIDEO_NOTE, NEXT_AGAIN, NEXT_BACK, PORTAL_URL,
-  START_ERRORS, PICK_NOTE, ITEMS_LEAD, HOW_BASELINE_MADE, BASELINE_TRIAL, KEY_LABEL
+  START_ERRORS, PICK_NOTE, ITEMS_LEAD, HOW_BASELINE_MADE, BASELINE_TRIAL, KEY_LABEL, SCORE_NOTE
 } from "../js/messages.js";
 import { DEFAULT_MODE } from "../js/view_mode.js";
 
@@ -112,7 +112,9 @@ test("AC-36：全体の形のチャートに、軸の数字・点数を描かな
   const chart = read("js/radar_chart.js");
   assert.doesNotMatch(chart, /r-score|scores\[axisId\]\)\s*\)|String\(score\)/);
   assert.match(read("js/report_view.js"), /sectionTitle\("全体の形"\)/);
-  assert.match(read("js/axis_card.js"), /点数 " \+ item\.score \+ " \/ 100（伸びる動画の多くと同じなら80以上）/);
+  // 〔v2.1〕点数の表示は「点数 ○ / 100（80以上で目安どおり）」に読み替え（仕様 8-5）
+  assert.match(read("js/axis_card.js"), /"点数 " \+ item\.score \+ " \/ 100" \+ SCORE_NOTE/);
+  assert.strictEqual(SCORE_NOTE, "（80以上で目安どおり）");
 });
 
 test("AC-38：次の行動の2ボタンと「← Yu」が portal を指す。「もう一度」ははじめの画面へ戻る", function () {
@@ -134,11 +136,11 @@ test("AC-31：はじめの画面に問いかけ・2択（好きな動画が初�
   assert.strictEqual(MODE_TEXT.maker.name, "自分で作った動画");
 });
 
-test("AC-20：スマホの待ち時間は 実測するまで画面に出さない（試作の「約2分」を入れない）", function () {
-  const config = read("js/config.js");
-  assert.match(config, /PHONE_WAIT_TEXT = null/);
+test("AC-20（AC-46で読み替え）：スマホの待ち時間は画面に出さない（PC 約1分だけ。測った値があっても画面に入れない）", function () {
+  assert.doesNotMatch(read("js/config.js"), /PHONE_WAIT_TEXT/);
   jsFiles().forEach(function (path) {
-    assert.doesNotMatch(read(path), /約2分/, path);
+    const text = read(path);
+    assert.doesNotMatch(text, /約2分|スマホ 約|スマホで" \+|PHONE_WAIT/, path);
   });
 });
 
